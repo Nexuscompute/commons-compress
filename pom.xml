@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-parent</artifactId>
-    <version>52</version>
+    <version>53</version>
   </parent>
 
   <artifactId>commons-compress</artifactId>
@@ -40,7 +40,7 @@ Brotli, Zstandard and ar, cpio, jar, tar, zip, dump, 7z, arj.
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
 
-    <commons.felix.version>5.1.4</commons.felix.version>
+    <commons.felix.version>5.1.6</commons.felix.version>
 
     <commons.componentid>compress</commons.componentid>
     <commons.module.name>org.apache.commons.compress</commons.module.name>
@@ -51,8 +51,8 @@ Brotli, Zstandard and ar, cpio, jar, tar, zip, dump, 7z, arj.
     <commons.rc.version>RC1</commons.rc.version>
     <!-- old version used by japicmp -->
     <commons.bc.version>1.21</commons.bc.version>
-    <mockito.version>4.2.0</mockito.version>
-    <commons.pmd-plugin.version>3.15.0</commons.pmd-plugin.version>
+    <mockito.version>4.6.1</mockito.version>
+    <commons.pmd-plugin.version>3.16.0</commons.pmd-plugin.version>
 
     <commons.manifestlocation>${project.build.outputDirectory}/META-INF</commons.manifestlocation>
     <commons.manifestfile>${commons.manifestlocation}/MANIFEST.MF</commons.manifestfile>
@@ -74,12 +74,13 @@ Brotli, Zstandard and ar, cpio, jar, tar, zip, dump, 7z, arj.
     <japicmp.skip>false</japicmp.skip>
 
     <junit.version>5.8.2</junit.version>
+    <commons.surefire.version>3.0.0-M6</commons.surefire.version>
     <pax.exam.version>4.13.5</pax.exam.version>
-    <slf4j.version>1.7.32</slf4j.version>
-    <commons.jacoco.version>0.8.7</commons.jacoco.version>
-    <commons.japicmp.version>0.15.4</commons.japicmp.version>
-    <commons.javadoc.version>3.3.1</commons.javadoc.version>
-    <asm.version>9.2</asm.version>
+    <slf4j.version>1.7.36</slf4j.version>
+    <commons.jacoco.version>0.8.8</commons.jacoco.version>
+    <commons.japicmp.version>0.15.7</commons.japicmp.version>
+    <commons.javadoc.version>3.4.0</commons.javadoc.version>
+    <asm.version>9.3</asm.version>
   </properties>
 
   <issueManagement>
@@ -115,7 +116,7 @@ Brotli, Zstandard and ar, cpio, jar, tar, zip, dump, 7z, arj.
     <dependency>
       <groupId>com.github.luben</groupId>
       <artifactId>zstd-jni</artifactId>
-      <version>1.5.1-1</version>
+      <version>1.5.2-3</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -187,7 +188,7 @@ Brotli, Zstandard and ar, cpio, jar, tar, zip, dump, 7z, arj.
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.framework</artifactId>
-      <version>7.0.3</version>
+      <version>7.0.5</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -200,6 +201,18 @@ Brotli, Zstandard and ar, cpio, jar, tar, zip, dump, 7z, arj.
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
+      <scope>test</scope>
+    </dependency>    
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.11.0</version>
+      <scope>test</scope>
+    </dependency>    
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.12.0</version>
       <scope>test</scope>
     </dependency>    
 
@@ -309,6 +322,10 @@ Brotli, Zstandard and ar, cpio, jar, tar, zip, dump, 7z, arj.
       <name>Michael Hausegger</name>
       <email>hausegger.michael@googlemail.com</email>
     </contributor>
+    <contributor>
+      <name>Arturo Bernal</name>
+      <email>arturobernalg@yahoo.com</email>
+    </contributor>
   </contributors>
 
   <scm>
@@ -318,7 +335,7 @@ Brotli, Zstandard and ar, cpio, jar, tar, zip, dump, 7z, arj.
   </scm>
 
   <build>
-    <defaultGoal>clean package apache-rat:check japicmp:cmp javadoc:javadoc</defaultGoal>
+    <defaultGoal>clean verify apache-rat:check japicmp:cmp javadoc:javadoc</defaultGoal>
     <pluginManagement>
       <plugins>
         <!-- Override Javadoc config in parent pom to add JCIP tags -->
@@ -609,7 +626,7 @@ Brotli, Zstandard and ar, cpio, jar, tar, zip, dump, 7z, arj.
         <jdk>[9,)</jdk>
       </activation>
       <properties>
-        <maven.compiler.release>9</maven.compiler.release>
+        <maven.compiler.release>8</maven.compiler.release>
         <animal.sniffer.skip>true</animal.sniffer.skip>
         <!-- coverall version 4.3.0 does not work with java 9, see https://github.com/trautonen/coveralls-maven-plugin/issues/112 -->
         <coveralls.skip>true</coveralls.skip>
