@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -21,6 +21,7 @@ package org.apache.commons.compress.compressors.gzip;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -51,7 +52,7 @@ import org.apache.commons.compress.compressors.gzip.ExtraField.SubField;
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc1952">RFC 1952 GZIP File Format Specification</a>
  * @since 1.28.0
  */
-public class ExtraField implements Iterable<SubField> {
+public final class ExtraField implements Iterable<SubField> {
 
     /**
      * If the {@code FLG.FEXTRA} bit is set, an "extra field" is present in the header, with total length XLEN bytes. It consists of a series of subfields, each
@@ -80,7 +81,7 @@ public class ExtraField implements Iterable<SubField> {
      *
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc1952">RFC 1952 GZIP File Format Specification</a>
      */
-    public static class SubField {
+    public static final class SubField {
 
         private final byte si1;
         private final byte si2;
@@ -90,6 +91,21 @@ public class ExtraField implements Iterable<SubField> {
             this.si1 = si1;
             this.si2 = si2;
             this.payload = payload;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final SubField other = (SubField) obj;
+            return Arrays.equals(payload, other.payload) && si1 == other.si1 && si2 == other.si2;
         }
 
         /**
@@ -108,6 +124,15 @@ public class ExtraField implements Iterable<SubField> {
          */
         public byte[] getPayload() {
             return payload;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + Arrays.hashCode(payload);
+            result = prime * result + Objects.hash(si1, si2);
+            return result;
         }
     }
 
@@ -142,7 +167,7 @@ public class ExtraField implements Iterable<SubField> {
 
     private final List<SubField> subFields = new ArrayList<>();
 
-    private int totalSize = 0;
+    private int totalSize;
 
     /**
      * Constructs a new instance.
@@ -151,7 +176,7 @@ public class ExtraField implements Iterable<SubField> {
     }
 
     /**
-     * Append a subfield by a 2-chars ISO-8859-1 string. The char at index 0 and 1 are respectiovely si1 and si2 (subfield id 1 and 2).
+     * Append a subfield by a 2-chars ISO-8859-1 string. The char at index 0 and 1 are respectively si1 and si2 (subfield id 1 and 2).
      *
      * @param id      The subfield ID.
      * @param payload The subfield payload.
@@ -190,6 +215,21 @@ public class ExtraField implements Iterable<SubField> {
         totalSize = 0;
     }
 
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ExtraField other = (ExtraField) obj;
+        return Objects.equals(subFields, other.subFields) && totalSize == other.totalSize;
+    }
+
     /**
      * Finds the first subfield that matched the id if found, null otherwise.
      *
@@ -219,6 +259,11 @@ public class ExtraField implements Iterable<SubField> {
      */
     public SubField getSubField(final int index) {
         return subFields.get(index);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(subFields, totalSize);
     }
 
     /**

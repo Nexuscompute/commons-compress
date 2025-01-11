@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -25,7 +25,6 @@ import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.zip.CRC32;
 import java.util.zip.Deflater;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.compress.compressors.CompressorOutputStream;
@@ -38,23 +37,11 @@ import org.apache.commons.compress.compressors.CompressorOutputStream;
  */
 public class GzipCompressorOutputStream extends CompressorOutputStream<OutputStream> {
 
-    /** Header flag indicating an EXTRA subfields collection follows the header */
-    private static final int FEXTRA = 1 << 2;
-
-    /** Header flag indicating a file name follows the header */
-    private static final int FNAME = 1 << 3;
-
-    /** Header flag indicating a comment follows the header */
-    private static final int FCOMMENT = 1 << 4;
-
     /** Deflater used to compress the data */
     private final Deflater deflater;
 
     /** The buffer receiving the compressed data from the deflater */
     private final byte[] deflateBuffer;
-
-    /** Indicates if the stream has been closed */
-    private boolean closed;
 
     /** The checksum of the uncompressed data */
     private final CRC32 crc = new CRC32();
@@ -82,18 +69,17 @@ public class GzipCompressorOutputStream extends CompressorOutputStream<OutputStr
         this.deflater = new Deflater(parameters.getCompressionLevel(), true);
         this.deflater.setStrategy(parameters.getDeflateStrategy());
         this.deflateBuffer = new byte[parameters.getBufferSize()];
-        writeHeader(parameters);
+        writeMemberHeader(parameters);
     }
 
     @Override
     public void close() throws IOException {
-        if (!closed) {
+        if (!isClosed()) {
             try {
                 finish();
             } finally {
                 deflater.end();
-                out.close();
-                closed = true;
+                super.close();
             }
         }
     }
@@ -111,13 +97,15 @@ public class GzipCompressorOutputStream extends CompressorOutputStream<OutputStr
      * @since 1.7
      * @throws IOException on error
      */
+    @Override
     public void finish() throws IOException {
         if (!deflater.finished()) {
             deflater.finish();
             while (!deflater.finished()) {
                 deflate();
             }
-            writeTrailer();
+            writeMemberTrailer();
+            deflater.reset();
         }
     }
 
@@ -138,8 +126,9 @@ public class GzipCompressorOutputStream extends CompressorOutputStream<OutputStr
      */
     @Override
     public void write(final byte[] buffer, final int offset, final int length) throws IOException {
+        checkOpen();
         if (deflater.finished()) {
-            throw new IOException("Cannot write more data, the end of the compressed data stream has been reached");
+            throw new IOException("Cannot write more data, the end of the compressed data stream has been reached.");
         }
         if (length > 0) {
             deflater.setInput(buffer, offset, length);
@@ -156,7 +145,7 @@ public class GzipCompressorOutputStream extends CompressorOutputStream<OutputStr
     }
 
     /**
-     * Writes a NUL-terminated String encoded with the {@code charset}.
+     * Writes a C-style string, a NUL-terminated string, encoded with the {@code charset}.
      *
      * @param value The String to write.
      * @param charset Specifies the Charset to use.
@@ -164,42 +153,71 @@ public class GzipCompressorOutputStream extends CompressorOutputStream<OutputStr
      */
     private void writeC(final String value, final Charset charset) throws IOException {
         if (value != null) {
-            out.write(value.getBytes(charset));
+            final byte[] ba = value.getBytes(charset);
+            out.write(ba);
             out.write(0);
+            crc.update(ba);
+            crc.update(0);
         }
     }
 
-    private void writeHeader(final GzipParameters parameters) throws IOException {
+    private void writeMemberHeader(final GzipParameters parameters) throws IOException {
         final String fileName = parameters.getFileName();
         final String comment = parameters.getComment();
         final byte[] extra = parameters.getExtraField() != null ? parameters.getExtraField().toByteArray() : null;
         final ByteBuffer buffer = ByteBuffer.allocate(10);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
-        buffer.putShort((short) GZIPInputStream.GZIP_MAGIC);
+        buffer.put((byte) GzipUtils.ID1);
+        buffer.put((byte) GzipUtils.ID2);
         buffer.put((byte) Deflater.DEFLATED); // compression method (8: deflate)
-        buffer.put((byte) ((extra != null ? FEXTRA : 0) | (fileName != null ? FNAME : 0) | (comment != null ? FCOMMENT : 0))); // flags
-        buffer.putInt((int) (parameters.getModificationTime() / 1000));
+        buffer.put((byte) ((extra != null ? GzipUtils.FEXTRA : 0)
+                | (fileName != null ? GzipUtils.FNAME : 0)
+                | (comment != null ? GzipUtils.FCOMMENT : 0)
+                | (parameters.getHeaderCRC() ? GzipUtils.FHCRC : 0)
+        )); // flags
+        buffer.putInt((int) parameters.getModificationInstant().getEpochSecond());
         // extra flags
         final int compressionLevel = parameters.getCompressionLevel();
         if (compressionLevel == Deflater.BEST_COMPRESSION) {
-            buffer.put((byte) 2);
+            buffer.put(GzipUtils.XFL_MAX_COMPRESSION);
         } else if (compressionLevel == Deflater.BEST_SPEED) {
-            buffer.put((byte) 4);
+            buffer.put(GzipUtils.XFL_MAX_SPEED);
         } else {
-            buffer.put((byte) 0);
+            buffer.put(GzipUtils.XFL_UNKNOWN);
         }
         buffer.put((byte) parameters.getOperatingSystem());
         out.write(buffer.array());
+        crc.update(buffer.array());
         if (extra != null) {
             out.write(extra.length & 0xff); // little endian
             out.write(extra.length >>> 8 & 0xff);
             out.write(extra);
+            crc.update(extra.length & 0xff);
+            crc.update(extra.length >>> 8 & 0xff);
+            crc.update(extra);
         }
         writeC(fileName, parameters.getFileNameCharset());
         writeC(comment, parameters.getFileNameCharset());
+        if (parameters.getHeaderCRC()) {
+            final int v = (int) crc.getValue() & 0xffff;
+            out.write(v & 0xff);
+            out.write(v >>> 8 & 0xff);
+        }
+        crc.reset();
     }
 
-    private void writeTrailer() throws IOException {
+    /**
+     * Writes the member trailer.
+     * <pre>
+     *      0   1   2   3   4   5   6   7
+     *   +---+---+---+---+---+---+---+---+
+     *   |     CRC32     |     ISIZE     |
+     *   +---+---+---+---+---+---+---+---+
+     * </pre>
+     *
+     * @throws IOException if an I/O error occurs.
+     */
+    private void writeMemberTrailer() throws IOException {
         final ByteBuffer buffer = ByteBuffer.allocate(8);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         buffer.putInt((int) crc.getValue());

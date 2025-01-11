@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -43,7 +43,7 @@ public final class BZip2Test extends AbstractTest {
 
     @Test
     public void testBzipCreation() throws Exception {
-        File output;
+        final File output;
         final File input = getFile("test.txt");
         {
             output = newTempFile("test.txt.bz2");

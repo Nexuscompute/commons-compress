@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.apache.commons.compress.archivers.zip;
@@ -30,7 +32,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Enumeration;
 import java.util.zip.CRC32;
 
 import org.apache.commons.compress.AbstractTest;
@@ -127,10 +128,8 @@ public class UTF8ZipFilesTest extends AbstractTest {
     }
 
     private static void testFile(final File file, final String encoding) throws IOException {
-        try (ZipFile zf = ZipFile.builder().setFile(file).setCharset(encoding).setUseUnicodeExtraFields(false).get()) {
-            final Enumeration<ZipArchiveEntry> e = zf.getEntries();
-            while (e.hasMoreElements()) {
-                final ZipArchiveEntry ze = e.nextElement();
+        try (ZipFile zipFile = ZipFile.builder().setFile(file).setCharset(encoding).setUseUnicodeExtraFields(false).get()) {
+            zipFile.stream().forEach(ze -> {
                 if (ze.getName().endsWith("sser.txt")) {
                     assertUnicodeName(ze, OIL_BARREL_TXT, encoding);
                 } else if (ze.getName().endsWith("_for_Dollar.txt")) {
@@ -138,7 +137,7 @@ public class UTF8ZipFilesTest extends AbstractTest {
                 } else if (!ze.getName().equals(ASCII_TXT)) {
                     fail("Unrecognized ZIP entry with name [" + ze.getName() + "] found.");
                 }
-            }
+            });
         }
     }
 

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -66,10 +66,7 @@ public class DumpArchiveSummary {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         final DumpArchiveSummary other = (DumpArchiveSummary) obj;
@@ -77,7 +74,7 @@ public class DumpArchiveSummary {
     }
 
     /**
-     * Gets the device name, e.g., /dev/sda3 or /dev/mapper/vg0-home.
+     * Gets the device name, for example, /dev/sda3 or /dev/mapper/vg0-home.
      *
      * @return device name
      */
@@ -95,7 +92,7 @@ public class DumpArchiveSummary {
     }
 
     /**
-     * Gets the last mountpoint, e.g., /home.
+     * Gets the last mountpoint, for example, /home.
      *
      * @return last mountpoint
      */

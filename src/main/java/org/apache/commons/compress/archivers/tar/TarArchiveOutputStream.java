@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -80,7 +80,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
     public static final int LONGFILE_POSIX = 3;
 
     /**
-     * Fail if a big number (e.g. size &gt; 8GiB) is required in the archive.
+     * Fail if a big number (for example size &gt; 8GiB) is required in the archive.
      */
     public static final int BIGNUMBER_ERROR = 0;
 
@@ -185,10 +185,10 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
      *
      * @param os        the output stream to use
      * @param blockSize the block size to use. Must be a multiple of 512 bytes.
-     * @param encoding  name of the encoding to use for file names
+     * @param charset  name of the encoding to use for file names
      * @since 1.4
      */
-    public TarArchiveOutputStream(final OutputStream os, final int blockSize, final String encoding) {
+    public TarArchiveOutputStream(final OutputStream os, final int blockSize, final String charset) {
         super(os);
         final int realBlockSize;
         if (BLOCK_SIZE_UNSPECIFIED == blockSize) {
@@ -201,8 +201,8 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
             throw new IllegalArgumentException("Block size must be a multiple of 512 bytes. Attempt to use set size of " + blockSize);
         }
         this.out = new FixedLengthBlockOutputStream(countingOut = new CountingOutputStream(os), RECORD_SIZE);
-        this.charsetName = Charsets.toCharset(encoding).name();
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.charsetName = Charsets.toCharset(charset).name();
+        this.zipEncoding = ZipEncodingHelper.getZipEncoding(charset);
 
         this.recordBuf = new byte[RECORD_SIZE];
         this.recordsPerBlock = realBlockSize / RECORD_SIZE;
@@ -216,11 +216,11 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
      * </p>
      *
      * @param os       the output stream to use
-     * @param encoding name of the encoding to use for file names
+     * @param charset name of the encoding to use for file names
      * @since 1.4
      */
-    public TarArchiveOutputStream(final OutputStream os, final String encoding) {
-        this(os, BLOCK_SIZE_UNSPECIFIED, encoding);
+    public TarArchiveOutputStream(final OutputStream os, final String charset) {
+        this(os, BLOCK_SIZE_UNSPECIFIED, charset);
     }
 
     private void addFileTimePaxHeader(final Map<String, String> paxHeaders, final String header, final FileTime value) {
@@ -276,7 +276,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
         addPaxHeaderForBigNumber(paxHeaders, "uid", entry.getLongUserId(), TarConstants.MAXID);
         // libarchive extensions
         addFileTimePaxHeader(paxHeaders, "LIBARCHIVE.creationtime", entry.getCreationTime());
-        // star extensions by Jörg Schilling
+        // star extensions by Jorg Schilling
         addPaxHeaderForBigNumber(paxHeaders, "SCHILY.devmajor", entry.getDevMajor(), TarConstants.MAXID);
         addPaxHeaderForBigNumber(paxHeaders, "SCHILY.devminor", entry.getDevMinor(), TarConstants.MAXID);
         // there is no PAX header for file mode
@@ -295,9 +295,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
                 finish();
             }
         } finally {
-            if (!isClosed()) {
-                super.close();
-            }
+            super.close();
         }
     }
 

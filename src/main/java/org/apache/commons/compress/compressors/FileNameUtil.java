@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -80,8 +80,10 @@ public class FileNameUtil {
      */
     public FileNameUtil(final Map<String, String> uncompressSuffix, final String defaultExtension) {
         this.uncompressSuffix = Collections.unmodifiableMap(uncompressSuffix);
-        int lc = Integer.MIN_VALUE, sc = Integer.MAX_VALUE;
-        int lu = Integer.MIN_VALUE, su = Integer.MAX_VALUE;
+        int lc = Integer.MIN_VALUE;
+        int sc = Integer.MAX_VALUE;
+        int lu = Integer.MIN_VALUE;
+        int su = Integer.MAX_VALUE;
         for (final Map.Entry<String, String> ent : uncompressSuffix.entrySet()) {
             final int cl = ent.getKey().length();
             if (cl > lc) {

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -45,7 +45,9 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
     static final ZipShort HEADER_ID = new ZipShort(0x0001);
 
     private static final String LFH_MUST_HAVE_BOTH_SIZES_MSG = "Zip64 extended information must contain" + " both size values in the local file header.";
-    private ZipEightByteInteger size, compressedSize, relativeHeaderOffset;
+    private ZipEightByteInteger size;
+    private ZipEightByteInteger compressedSize;
+    private ZipEightByteInteger relativeHeaderOffset;
     private ZipLong diskStart;
 
     /**

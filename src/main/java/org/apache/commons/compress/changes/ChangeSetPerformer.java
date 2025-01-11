@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -152,11 +152,7 @@ public class ChangeSetPerformer<I extends ArchiveInputStream<E>, O extends Archi
             for (final Change<E> change : workingSet) {
                 final ChangeType type = change.getType();
                 final String target = change.getTargetFileName();
-                if (type == ChangeType.DELETE && source.equals(target)) {
-                    return true;
-                }
-
-                if (type == ChangeType.DELETE_DIR && source.startsWith(target + "/")) {
+                if (type == ChangeType.DELETE && source.equals(target) || type == ChangeType.DELETE_DIR && source.startsWith(target + "/")) {
                     return true;
                 }
             }

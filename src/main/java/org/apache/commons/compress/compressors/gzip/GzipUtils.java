@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -33,7 +33,57 @@ import org.apache.commons.compress.compressors.FileNameUtil;
  */
 public class GzipUtils {
 
+    /** Header flag indicating a comment follows the header. */
+    static final int FCOMMENT = 0x10;
+
+    /** Header flag indicating an EXTRA subfields collection follows the header. */
+    static final int FEXTRA = 0x04;
+
+    /** Header flag indicating a header CRC follows the header. */
+    static final int FHCRC = 0x02;
+
     private static final FileNameUtil fileNameUtil;
+
+    /** Header flag indicating a file name follows the header. */
+    static final int FNAME = 0x08;
+
+    static final int FRESERVED = 0xE0;
+
+    /**
+     * Charset for file name and comments per the <a href="https://tools.ietf.org/html/rfc1952">GZIP File Format Specification</a>.
+     */
+    static final Charset GZIP_ENCODING = StandardCharsets.ISO_8859_1;
+
+    /**
+     * Member header ID1 (IDentification 1).
+     *
+     * See <a href="https://datatracker.ietf.org/doc/html/rfc1952#page-5">RFC1952</a> 2.3.1. Member header and trailer.
+     */
+    static final int ID1 = 31;
+
+    /**
+     * Member header ID2 (IDentification 2).
+     *
+     * See <a href="https://datatracker.ietf.org/doc/html/rfc1952#page-5">RFC1952</a> 2.3.1. Member header and trailer.
+     */
+    static final int ID2 = 139;
+
+    /**
+     * Member header XFL (eXtra FLags) when the "deflate" method (CM = 8) is set, then XFL = 2 means the compressor used maximum compression (slowest
+     * algorithm).
+     *
+     * See <a href="https://datatracker.ietf.org/doc/html/rfc1952#page-5">RFC1952</a> 2.3.1. Member header and trailer.
+     */
+    static final byte XFL_MAX_COMPRESSION = 2;
+
+    /**
+     * Member header XFL (eXtra FLags) when the "deflate" method (CM = 8) is set, then XFL = 4 means the compressor used the fastest algorithm.
+     *
+     * See <a href="https://datatracker.ietf.org/doc/html/rfc1952#page-5">RFC1952</a> 2.3.1. Member header and trailer.
+     */
+    static final byte XFL_MAX_SPEED = 4;
+
+    static final byte XFL_UNKNOWN = 0;
 
     static {
         // using LinkedHashMap so .tgz is preferred over .taz as
@@ -53,12 +103,6 @@ public class GzipUtils {
         uncompressSuffix.put("_z", "");
         fileNameUtil = new FileNameUtil(uncompressSuffix, ".gz");
     }
-
-    /**
-     * Charset for file name and comments per the <a href="https://tools.ietf.org/html/rfc1952">GZIP File Format Specification</a>.
-     */
-    static final Charset GZIP_ENCODING = StandardCharsets.ISO_8859_1;
-
     /**
      * Maps the given file name to the name that the file should have after compression with gzip. Common file types with custom suffixes for compressed
      * versions are automatically detected and correctly mapped. For example the name "package.tar" is mapped to "package.tgz". If no custom mapping is

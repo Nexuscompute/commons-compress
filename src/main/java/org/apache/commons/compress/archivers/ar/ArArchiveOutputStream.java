@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -49,6 +49,12 @@ public class ArArchiveOutputStream extends ArchiveOutputStream<ArArchiveEntry> {
     private boolean prevEntryOpen;
     private int longFileMode = LONGFILE_ERROR;
 
+    /**
+     * Constructs a new instance with the given backing OutputStream.
+     *
+     * @param out the underlying output stream to be assigned to the field {@code this.out} for later use, or {@code null} if this instance is to be created
+     *            without an underlying stream.
+     */
     public ArArchiveOutputStream(final OutputStream out) {
         super(out);
     }

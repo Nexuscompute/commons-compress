@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -81,16 +81,26 @@ public class LZ77Compressor {
     /**
      * Represents a back-reference.
      */
-    public static final class BackReference extends Block {
-        private final int offset, length;
+    public abstract static class AbstractReference extends Block {
 
-        public BackReference(final int offset, final int length) {
+        private final int offset;
+        private final int length;
+
+        /**
+         * Constructs a new instance.
+         *
+         * @param blockType The block type.
+         * @param offset the offset of the reference.
+         * @param length the offset of the reference.
+         */
+        public AbstractReference(final BlockType blockType, final int offset, final int length) {
+            super(blockType);
             this.offset = offset;
             this.length = length;
         }
 
         /**
-         * Provides the length of the back-reference.
+         * Gets the offset of the reference.
          *
          * @return the length
          */
@@ -99,7 +109,7 @@ public class LZ77Compressor {
         }
 
         /**
-         * Provides the offset of the back-reference.
+         * Gets the offset of the reference.
          *
          * @return the offset
          */
@@ -108,14 +118,26 @@ public class LZ77Compressor {
         }
 
         @Override
-        public BlockType getType() {
-            return BlockType.BACK_REFERENCE;
+        public String toString() {
+            return super.toString() + " with offset " + offset + " and length " + length;
+        }
+    }
+
+    /**
+     * Represents a back-reference.
+     */
+    public static final class BackReference extends AbstractReference {
+
+        /**
+         * Constructs a new instance.
+         *
+         * @param offset the offset of the back-reference.
+         * @param length the offset of the back-reference.
+         */
+        public BackReference(final int offset, final int length) {
+            super(BlockType.BACK_REFERENCE, offset, length);
         }
 
-        @Override
-        public String toString() {
-            return "BackReference with offset " + offset + " and length " + length;
-        }
     }
 
     /**
@@ -127,12 +149,62 @@ public class LZ77Compressor {
      * </p>
      */
     public abstract static class Block {
-        /** Enumeration of the block types the compressor may emit. */
+
+        /**
+         * Enumerates the block types the compressor emits.
+         */
         public enum BlockType {
-            LITERAL, BACK_REFERENCE, EOD
+
+            /**
+             * The literal block type.
+             */
+            LITERAL,
+
+            /**
+             * The back-reference block type.
+             */
+            BACK_REFERENCE,
+
+            /**
+             * The end-of-data block type.
+             */
+            EOD
         }
 
-        public abstract BlockType getType();
+        private final BlockType type;
+
+        /**
+         * Constructs a new typeless instance.
+         *
+         * @deprecated Use {@link #Block()}.
+         */
+        @Deprecated
+        public Block() {
+            this.type = null;
+        }
+
+        /**
+         * Constructs a new instance.
+         *
+         * @param type
+         */
+        protected Block(final BlockType type) {
+            this.type = Objects.requireNonNull(type);
+        }
+
+        /**
+         * Gets the the block type.
+         *
+         * @return the the block type.
+         */
+        public BlockType getType() {
+            return type;
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + " " + getType();
+        }
     }
 
     /**
@@ -144,6 +216,7 @@ public class LZ77Compressor {
      * </p>
      */
     public interface Callback {
+
         /**
          * Consumes a block.
          *
@@ -155,10 +228,19 @@ public class LZ77Compressor {
 
     /** A simple "we are done" marker. */
     public static final class EOD extends Block {
-        @Override
-        public BlockType getType() {
-            return BlockType.EOD;
+
+        /**
+         * Singleton instance.
+         */
+        private static final EOD INSTANCE = new EOD();
+
+        /**
+         * Constructs a new instance.
+         */
+        public EOD() {
+            super(BlockType.EOD);
         }
+
     }
 
     /**
@@ -169,21 +251,27 @@ public class LZ77Compressor {
      * immediately as it will get overwritten sooner or later.
      * </p>
      */
-    public static final class LiteralBlock extends Block {
-        private final byte[] data;
-        private final int offset, length;
+    public static final class LiteralBlock extends AbstractReference {
 
+        private final byte[] data;
+
+        /**
+         * Constructs a new instance.
+         *
+         * @param data the literal data.
+         * @param offset the length of literal block.
+         * @param length the length of literal block.
+         */
         public LiteralBlock(final byte[] data, final int offset, final int length) {
+            super(BlockType.LITERAL, offset, length);
             this.data = data;
-            this.offset = offset;
-            this.length = length;
         }
 
         /**
-         * The literal data.
+         * Gets the literal data.
          *
          * <p>
-         * This returns a life view of the actual data in order to avoid copying, modify the array at your own risk.
+         * This returns a live view of the actual data in order to avoid copying, modify the array at your own risk.
          * </p>
          *
          * @return the data
@@ -192,36 +280,7 @@ public class LZ77Compressor {
             return data;
         }
 
-        /**
-         * Length of literal block.
-         *
-         * @return the length
-         */
-        public int getLength() {
-            return length;
-        }
-
-        /**
-         * Offset into data where the literal block starts.
-         *
-         * @return the offset
-         */
-        public int getOffset() {
-            return offset;
-        }
-
-        @Override
-        public BlockType getType() {
-            return BlockType.LITERAL;
-        }
-
-        @Override
-        public String toString() {
-            return "LiteralBlock starting at " + offset + " with length " + length;
-        }
     }
-
-    private static final Block THE_EOD = new EOD();
 
     static final int NUMBER_OF_BYTES_IN_HASH = 3;
     private static final int NO_MATCH = -1;
@@ -397,7 +456,7 @@ public class LZ77Compressor {
             currentPosition += lookahead;
             flushLiteralBlock();
         }
-        callback.accept(THE_EOD);
+        callback.accept(EOD.INSTANCE);
     }
 
     private void flushBackReference(final int matchLength) throws IOException {

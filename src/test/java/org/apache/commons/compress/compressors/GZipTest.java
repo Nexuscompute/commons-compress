@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -251,7 +251,7 @@ public final class GZipTest extends AbstractTest {
     public void testOverWrite() throws Exception {
         final GzipCompressorOutputStream out = new GzipCompressorOutputStream(new ByteArrayOutputStream());
         out.close();
-        assertThrows(IOException.class, () -> out.write(0), "IOException expected");
+        assertThrows(IOException.class, () -> out.write(0));
     }
 
     @Test

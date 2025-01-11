@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -1392,13 +1392,8 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
             return "xustar".equals(archType) || "exustar".equals(archType);
         }
         // Check if this is XUSTAR
-        if (isInvalidPrefix(header)) {
-            return false;
-        }
-        if (isInvalidXtarTime(header, XSTAR_ATIME_OFFSET, ATIMELEN_XSTAR)) {
-            return false;
-        }
-        if (isInvalidXtarTime(header, XSTAR_CTIME_OFFSET, CTIMELEN_XSTAR)) {
+        if (isInvalidPrefix(header) || isInvalidXtarTime(header, XSTAR_ATIME_OFFSET, ATIMELEN_XSTAR)
+                || isInvalidXtarTime(header, XSTAR_CTIME_OFFSET, CTIMELEN_XSTAR)) {
             return false;
         }
         return true;

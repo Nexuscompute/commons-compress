@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.apache.commons.compress.archivers.zip;
@@ -42,7 +44,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -93,7 +94,7 @@ public class ZipFileTest extends AbstractTest {
 
         // big buffer at the beginning and then chunks by IOUtils read
         try (InputStream stream = zf.getInputStream(entry)) {
-            byte[] full;
+            final byte[] full;
             final byte[] bytes = new byte[0x40000];
             final int read = stream.read(bytes);
             if (read < 0) {
@@ -106,7 +107,7 @@ public class ZipFileTest extends AbstractTest {
 
         // small chunk / single byte and big buffer then
         try (InputStream stream = zf.getInputStream(entry)) {
-            byte[] full;
+            final byte[] full;
             final int single = stream.read();
             if (single < 0) {
                 full = ByteUtils.EMPTY_BYTE_ARRAY;
@@ -162,9 +163,9 @@ public class ZipFileTest extends AbstractTest {
 
     private void multiByteReadConsistentlyReturnsMinusOneAtEof(final File file) throws Exception {
         final byte[] buf = new byte[2];
-        try (ZipFile archive = ZipFile.builder().setFile(file).get()) {
-            final ZipArchiveEntry e = archive.getEntries().nextElement();
-            try (InputStream is = archive.getInputStream(e)) {
+        try (ZipFile zipFile = ZipFile.builder().setFile(file).get()) {
+            final ZipArchiveEntry e = zipFile.getEntries().nextElement();
+            try (InputStream is = zipFile.getInputStream(e)) {
                 IOUtils.toByteArray(is);
                 assertEquals(-1, is.read(buf));
                 assertEquals(-1, is.read(buf));
@@ -196,9 +197,9 @@ public class ZipFileTest extends AbstractTest {
     }
 
     private void singleByteReadConsistentlyReturnsMinusOneAtEof(final File file) throws Exception {
-        try (ZipFile archive = ZipFile.builder().setFile(file).get();) {
-            final ZipArchiveEntry e = archive.getEntries().nextElement();
-            try (InputStream is = archive.getInputStream(e)) {
+        try (ZipFile zipFile = ZipFile.builder().setFile(file).get();) {
+            final ZipArchiveEntry e = zipFile.getEntries().nextElement();
+            try (InputStream is = zipFile.getInputStream(e)) {
                 IOUtils.toByteArray(is);
                 assertEquals(-1, is.read());
                 assertEquals(-1, is.read());
@@ -264,19 +265,15 @@ public class ZipFileTest extends AbstractTest {
         // mixed.zip contains both inflated and stored files
         final File archive = getFile("mixed.zip");
         zf = new ZipFile(archive);
-
         final Map<String, byte[]> content = new HashMap<>();
-        for (final ZipArchiveEntry entry : Collections.list(zf.getEntries())) {
+        zf.stream().forEach(entry -> {
             try (InputStream inputStream = zf.getInputStream(entry)) {
                 content.put(entry.getName(), IOUtils.toByteArray(inputStream));
             }
-        }
-
+        });
         final AtomicInteger passedCount = new AtomicInteger();
         final IORunnable run = () -> {
-            for (final ZipArchiveEntry entry : Collections.list(zf.getEntries())) {
-                assertAllReadMethods(content.get(entry.getName()), zf, entry);
-            }
+            zf.stream().forEach(entry -> assertAllReadMethods(content.get(entry.getName()), zf, entry));
             passedCount.incrementAndGet();
         };
         final Thread t0 = new Thread(run.asRunnable());
@@ -291,25 +288,21 @@ public class ZipFileTest extends AbstractTest {
     @Test
     public void testConcurrentReadSeekable() throws Exception {
         // mixed.zip contains both inflated and stored files
-        byte[] data;
+        final byte[] data;
         try (InputStream fis = newInputStream("mixed.zip")) {
             data = IOUtils.toByteArray(fis);
         }
         try (SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel(data)) {
             zf = ZipFile.builder().setSeekableByteChannel(channel).setCharset(StandardCharsets.UTF_8).get();
-
             final Map<String, byte[]> content = new HashMap<>();
-            for (final ZipArchiveEntry entry : Collections.list(zf.getEntries())) {
+            zf.stream().forEach(entry -> {
                 try (InputStream inputStream = zf.getInputStream(entry)) {
                     content.put(entry.getName(), IOUtils.toByteArray(inputStream));
                 }
-            }
-
+            });
             final AtomicInteger passedCount = new AtomicInteger();
             final IORunnable run = () -> {
-                for (final ZipArchiveEntry entry : Collections.list(zf.getEntries())) {
-                    assertAllReadMethods(content.get(entry.getName()), zf, entry);
-                }
+                zf.stream().forEach(entry -> assertAllReadMethods(content.get(entry.getName()), zf, entry));
                 passedCount.incrementAndGet();
             };
             final Thread t0 = new Thread(run.asRunnable());
@@ -557,6 +550,38 @@ public class ZipFileTest extends AbstractTest {
             zipEntry = zf.getEntry("commons-compress/src/main/java/org/apache/commons/compress/compressors/deflate/DeflateParameters.java");
             fileToCompare = getFile("COMPRESS-477/split_zip_created_by_zip/file_to_compare_2");
             assertFileEqualsToEntry(fileToCompare, zipEntry, zf);
+        }
+    }
+
+    @Test
+    public void testGetEntries() throws Exception {
+        // mixed.zip contains both inflated and stored files
+        final File archive = getFile("mixed.zip");
+        zf = new ZipFile(archive);
+        final Map<String, byte[]> content = new HashMap<>();
+        for (final ZipArchiveEntry entry : Collections.list(zf.getEntries())) {
+            try (InputStream inputStream = zf.getInputStream(entry)) {
+                content.put(entry.getName(), IOUtils.toByteArray(inputStream));
+            }
+        }
+        for (final ZipArchiveEntry entry : Collections.list(zf.getEntries())) {
+            assertAllReadMethods(content.get(entry.getName()), zf, entry);
+        }
+    }
+
+    @Test
+    public void testGetEntriesInPhysicalOrder() throws Exception {
+        // mixed.zip contains both inflated and stored files
+        final File archive = getFile("mixed.zip");
+        zf = new ZipFile(archive);
+        final Map<String, byte[]> content = new HashMap<>();
+        for (final ZipArchiveEntry entry : Collections.list(zf.getEntriesInPhysicalOrder())) {
+            try (InputStream inputStream = zf.getInputStream(entry)) {
+                content.put(entry.getName(), IOUtils.toByteArray(inputStream));
+            }
+        }
+        for (final ZipArchiveEntry entry : Collections.list(zf.getEntries())) {
+            assertAllReadMethods(content.get(entry.getName()), zf, entry);
         }
     }
 
@@ -887,7 +912,6 @@ public class ZipFileTest extends AbstractTest {
     public void testUnixSymlinkSampleFile() throws Exception {
         final String entryPrefix = "COMPRESS-214_unix_symlinks/";
         final TreeMap<String, String> expectedVals = new TreeMap<>();
-
         // I threw in some Japanese characters to keep things interesting.
         expectedVals.put(entryPrefix + "link1", "../COMPRESS-214_unix_symlinks/./a/b/c/../../../\uF999");
         expectedVals.put(entryPrefix + "link2", "../COMPRESS-214_unix_symlinks/./a/b/c/../../../g");
@@ -896,21 +920,15 @@ public class ZipFileTest extends AbstractTest {
         expectedVals.put(entryPrefix + "\uF999", "./\u82B1\u5B50/\u745B\u5B50/\u5897\u8C37/\uF999");
         expectedVals.put(entryPrefix + "g", "./a/b/c/d/e/f/g");
         expectedVals.put(entryPrefix + "\u76F4\u6A39", "./g");
-
         // Notice how a directory link might contain a trailing slash, or it might not.
         // Also note: symlinks are always stored as files, even if they link to directories.
         expectedVals.put(entryPrefix + "link5", "../COMPRESS-214_unix_symlinks/././a/b");
         expectedVals.put(entryPrefix + "link6", "../COMPRESS-214_unix_symlinks/././a/b/");
-
         // I looked into creating a test with hard links, but ZIP does not appear to
         // support hard links, so nevermind.
-
         final File archive = getFile("COMPRESS-214_unix_symlinks.zip");
-
         zf = new ZipFile(archive);
-        final Enumeration<ZipArchiveEntry> en = zf.getEntries();
-        while (en.hasMoreElements()) {
-            final ZipArchiveEntry zae = en.nextElement();
+        zf.stream().forEach(zae -> {
             final String link = zf.getUnixSymlink(zae);
             if (zae.isUnixSymlink()) {
                 final String name = zae.getName();
@@ -920,7 +938,7 @@ public class ZipFileTest extends AbstractTest {
                 // Should be null if it's not a symlink!
                 assertNull(link);
             }
-        }
+        });
     }
 
     @Test
@@ -983,6 +1001,5 @@ public class ZipFileTest extends AbstractTest {
             }
         }
     }
-
 
 }

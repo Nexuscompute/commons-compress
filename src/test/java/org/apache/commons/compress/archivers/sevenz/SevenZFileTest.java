@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.commons.compress.archivers.sevenz;
 
@@ -403,6 +405,7 @@ public class SevenZFileTest extends AbstractTest {
     public void testHandlesEmptyArchiveWithFilesInfo() throws Exception {
         final File file = newTempFile("empty.7z");
         try (SevenZOutputFile s = new SevenZOutputFile(file)) {
+            // do nothing
         }
         try (SevenZFile z = SevenZFile.builder().setFile(file).get()) {
             assertFalse(z.getEntries().iterator().hasNext());
@@ -435,6 +438,11 @@ public class SevenZFileTest extends AbstractTest {
     public void testLimitExtractionMemory() {
         assertThrows(MemoryLimitException.class, () -> {
             try (SevenZFile sevenZFile = SevenZFile.builder().setFile(getFile("bla.7z")).setMaxMemoryLimitKb(1).get()) {
+                // Do nothing. Exception should be thrown
+            }
+        });
+        assertThrows(MemoryLimitException.class, () -> {
+            try (SevenZFile sevenZFile = SevenZFile.builder().setFile(getFile("bla.7z")).setMaxMemoryLimitKiB(1).get()) {
                 // Do nothing. Exception should be thrown
             }
         });
@@ -473,13 +481,13 @@ public class SevenZFileTest extends AbstractTest {
         testFiles.add(getPath("COMPRESS-542-2.7z"));
         testFiles.add(getPath("COMPRESS-542-endheadercorrupted.7z"));
         testFiles.add(getPath("COMPRESS-542-endheadercorrupted2.7z"));
-
         for (final Path file : testFiles) {
             {
                 final IOException e = assertThrows(IOException.class, () -> {
                     try (@SuppressWarnings("deprecation")
                     SevenZFile sevenZFile = new SevenZFile(Files.newByteChannel(file),
                             SevenZFileOptions.builder().withTryToRecoverBrokenArchives(true).build())) {
+                        // do nothing
                     }
                 }, "Expected IOException: start header corrupt and unable to guess end header");
                 assertEquals("Start header corrupt and unable to guess end header", e.getMessage());
@@ -488,6 +496,7 @@ public class SevenZFileTest extends AbstractTest {
                 final IOException e = assertThrows(IOException.class, () -> {
                     try (SevenZFile sevenZFile = SevenZFile.builder().setSeekableByteChannel(Files.newByteChannel(file)).setTryToRecoverBrokenArchives(true)
                             .get()) {
+                        // do nothing
                     }
                 }, "Expected IOException: start header corrupt and unable to guess end header");
                 assertEquals("Start header corrupt and unable to guess end header", e.getMessage());

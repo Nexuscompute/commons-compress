@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -22,6 +22,7 @@ package org.apache.commons.compress.compressors.gzip;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.zip.Deflater;
 
 import org.apache.commons.io.Charsets;
@@ -63,11 +64,10 @@ public class GzipParameters {
      */
     public enum OS {
 
-        // @formatter:off
         /**
-         * 0: FAT filesystem (MS-DOS, OS/2, NT/Win32).
+         * 13: Acorn RISCOS.
          */
-        FAT(OS_FAT),
+        ACORN_RISCOS(OS_ACORN_RISCOS),
 
         /**
          * 1: Amiga.
@@ -75,24 +75,20 @@ public class GzipParameters {
         AMIGA(OS_AMIGA),
 
         /**
-         * 2: VMS (or OpenVMS).
-         */
-        VMS(OS_VMS),
-
-        /**
-         * 3: Unix.
-         */
-        UNIX(OS_UNIX),
-
-        /**
-         * 4: VM/CMS.
-         */
-        VM_CMS(OS_VM_CMS),
-
-        /**
          * 5: Atari TOS.
          */
         ATARI_TOS(OS_ATARI_TOS),
+
+        /**
+         * 9: CP/M.
+         */
+        CPM(OS_CPM),
+
+        // @formatter:off
+        /**
+         * 0: FAT filesystem (MS-DOS, OS/2, NT/Win32).
+         */
+        FAT(OS_FAT),
 
         /**
          * 6: HPFS filesystem (OS/2, NT).
@@ -105,21 +101,6 @@ public class GzipParameters {
         MACINTOSH(OS_MACINTOSH),
 
         /**
-         * 8: Z-System.
-         */
-        Z_SYSTEM(OS_Z_SYSTEM),
-
-        /**
-         * 9: CP/M.
-         */
-        CPM(OS_CPM),
-
-        /**
-         * 10: TOPS-20.
-         */
-        TOPS_20(OS_TOPS_20),
-
-        /**
          * 11: NTFS filesystem (NT).
          */
         NTFS(OS_NTFS),
@@ -130,14 +111,34 @@ public class GzipParameters {
         QDOS(OS_QDOS),
 
         /**
-         * 13: Acorn RISCOS.
+         * 10: TOPS-20.
          */
-        ACORN_RISCOS(OS_ACORN_RISCOS),
+        TOPS_20(OS_TOPS_20),
+
+        /**
+         * 3: Unix.
+         */
+        UNIX(OS_UNIX),
 
         /**
          * 255: unknown.
          */
-        UNKNOWN(OS_UNKNOWN);
+        UNKNOWN(OS_UNKNOWN),
+
+        /**
+         * 4: VM/CMS.
+         */
+        VM_CMS(OS_VM_CMS),
+
+        /**
+         * 2: VMS (or OpenVMS).
+         */
+        VMS(OS_VMS),
+
+        /**
+         * 8: Z-System.
+         */
+        Z_SYSTEM(OS_Z_SYSTEM);
         // @formatter:on
 
         /**
@@ -205,10 +206,12 @@ public class GzipParameters {
 
     }
 
+    private static final int BUFFER_SIZE = 512;
+
     /**
-     * 0: FAT.
+     * 13: Acorn RISCOS.
      */
-    private static final int OS_FAT = 0;
+    private static final int OS_ACORN_RISCOS = 13;
 
     /**
      * 1: Amiga.
@@ -216,24 +219,19 @@ public class GzipParameters {
     private static final int OS_AMIGA = 1;
 
     /**
-     * 2: VMS (or OpenVMS).
-     */
-    private static final int OS_VMS = 2;
-
-    /**
-     * 3: Unix.
-     */
-    private static final int OS_UNIX = 3;
-
-    /**
-     * 4: VM/CMS.
-     */
-    private static final int OS_VM_CMS = 4;
-
-    /**
      * 5: Atari TOS.
      */
     private static final int OS_ATARI_TOS = 5;
+
+    /**
+     * 9: CP/M.
+     */
+    private static final int OS_CPM = 9;
+
+    /**
+     * 0: FAT.
+     */
+    private static final int OS_FAT = 0;
 
     /**
      * 6: HPFS filesystem (OS/2, NT).
@@ -246,21 +244,6 @@ public class GzipParameters {
     private static final int OS_MACINTOSH = 7;
 
     /**
-     * 8: Z-System.
-     */
-    private static final int OS_Z_SYSTEM = 8;
-
-    /**
-     * 9: CP/M.
-     */
-    private static final int OS_CPM = 9;
-
-    /**
-     * 10: TOPS-20.
-     */
-    private static final int OS_TOPS_20 = 10;
-
-    /**
      * 11: NTFS filesystem (NT).
      */
     private static final int OS_NTFS = 11;
@@ -271,17 +254,44 @@ public class GzipParameters {
     private static final int OS_QDOS = 12;
 
     /**
-     * 13: Acorn RISCOS.
+     * 10: TOPS-20.
      */
-    private static final int OS_ACORN_RISCOS = 13;
+    private static final int OS_TOPS_20 = 10;
+
+    /**
+     * 3: Unix.
+     */
+    private static final int OS_UNIX = 3;
 
     /**
      * 255: unknown.
      */
     private static final int OS_UNKNOWN = 255;
 
-    private int compressionLevel = Deflater.DEFAULT_COMPRESSION;
+    /**
+     * 4: VM/CMS.
+     */
+    private static final int OS_VM_CMS = 4;
 
+    /**
+     * 2: VMS (or OpenVMS).
+     */
+    private static final int OS_VMS = 2;
+
+    /**
+     * 8: Z-System.
+     */
+    private static final int OS_Z_SYSTEM = 8;
+
+    private int bufferSize = BUFFER_SIZE;
+
+    private String comment;
+    private int compressionLevel = Deflater.DEFAULT_COMPRESSION;
+    private int deflateStrategy = Deflater.DEFAULT_STRATEGY;
+    private ExtraField extraField;
+    private String fileName;
+    private Charset fileNameCharset = GzipUtils.GZIP_ENCODING;
+    private boolean headerCrc;
     /**
      * The most recent modification time (MTIME) of the original file being compressed.
      * <p>
@@ -290,21 +300,33 @@ public class GzipParameters {
      * means no time stamp is available.
      * </p>
      */
-    private Instant modificationTime = Instant.EPOCH;
-    private ExtraField extraField;
-    private String fileName;
-    private Charset fileNameCharset = GzipUtils.GZIP_ENCODING;
-    private String comment;
+    private Instant modificationInstant = Instant.EPOCH;
     private OS operatingSystem = OS.UNKNOWN; // Unknown OS by default
-    private int bufferSize = 512;
-    private int deflateStrategy = Deflater.DEFAULT_STRATEGY;
+    private long trailerCrc;
+    private long trailerISize;
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof GzipParameters)) {
+            return false;
+        }
+        final GzipParameters other = (GzipParameters) obj;
+        return bufferSize == other.bufferSize && Objects.equals(comment, other.comment) && compressionLevel == other.compressionLevel
+                && deflateStrategy == other.deflateStrategy && Objects.equals(extraField, other.extraField) && Objects.equals(fileName, other.fileName)
+                && Objects.equals(fileNameCharset, other.fileNameCharset) && headerCrc == other.headerCrc
+                && Objects.equals(modificationInstant, other.modificationInstant) && operatingSystem == other.operatingSystem && trailerCrc == other.trailerCrc
+                && trailerISize == other.trailerISize;
+    }
 
     /**
      * Gets size of the buffer used to retrieve compressed data.
      *
      * @return The size of the buffer used to retrieve compressed data.
-     * @since 1.21
      * @see #setBufferSize(int)
+     * @since 1.21
      */
     public int getBufferSize() {
         return this.bufferSize;
@@ -388,6 +410,15 @@ public class GzipParameters {
         return fileNameCharset;
     }
 
+    /**
+     * Returns if the header CRC is to be added (when writing) or was present (when reading).
+     *
+     * @return true is header CRC will be added (on write) or was found (after read).
+     * @since 1.28.0
+     */
+    public boolean getHeaderCRC() {
+        return headerCrc;
+    }
 
     /**
      * Gets the most recent modification time (MTIME) of the original file being compressed.
@@ -396,7 +427,7 @@ public class GzipParameters {
      * @since 1.28.0
      */
     public Instant getModificationInstant() {
-        return modificationTime;
+        return modificationInstant;
     }
 
     /**
@@ -410,7 +441,7 @@ public class GzipParameters {
      * @return the most recent modification time in seconds since 00:00:00 GMT, Jan. 1, 1970.
      */
     public long getModificationTime() {
-        return modificationTime.getEpochSecond();
+        return modificationInstant.getEpochSecond();
     }
 
     /**
@@ -430,6 +461,32 @@ public class GzipParameters {
      */
     public OS getOS() {
         return operatingSystem;
+    }
+
+    /**
+     * Gets the trailer CRC value.
+     *
+     * @return the trailer CRC value.
+     * @since 1.28.0
+     */
+    public long getTrailerCrc() {
+        return trailerCrc;
+    }
+
+    /**
+     * Gets the trailer ISIZE value.
+     *
+     * @return the trailer ISIZE value.
+     * @since 1.28.0
+     */
+    public long getTrailerISize() {
+        return trailerISize;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(bufferSize, comment, compressionLevel, deflateStrategy, extraField, fileName, fileNameCharset, headerCrc, modificationInstant,
+                operatingSystem, trailerCrc, trailerISize);
     }
 
     private String requireNonNulByte(final String text) {
@@ -540,13 +597,24 @@ public class GzipParameters {
     }
 
     /**
+     * Establishes the presence of the header flag FLG.FHCRC and its headers CRC16 value.
+     *
+     * @param headerCRC when true, the header CRC16 (actually low 16 buts of a CRC32) is calculated and inserted
+     *         in the gzip header on write; on read it means the field was present.
+     * @since 1.28.0
+     */
+    public void setHeaderCRC(final boolean headerCRC) {
+        this.headerCrc = headerCRC;
+    }
+
+    /**
      * Sets the modification time (MTIME) of the compressed file.
      *
      * @param modificationTime the modification time, in milliseconds
      * @since 1.28.0
      */
     public void setModificationInstant(final Instant modificationTime) {
-        this.modificationTime = modificationTime != null ? modificationTime : Instant.EPOCH;
+        this.modificationInstant = modificationTime != null ? modificationTime : Instant.EPOCH;
     }
 
     /**
@@ -557,10 +625,10 @@ public class GzipParameters {
      * means no time stamp is available.
      * </p>
      *
-     * @param modificationTime the modification time, in seconds.
+     * @param modificationTimeSeconds the modification time, in seconds.
      */
-    public void setModificationTime(final long modificationTime) {
-        this.modificationTime = Instant.ofEpochSecond(modificationTime);
+    public void setModificationTime(final long modificationTimeSeconds) {
+        this.modificationInstant = Instant.ofEpochSecond(modificationTimeSeconds);
     }
 
     /**
@@ -599,12 +667,22 @@ public class GzipParameters {
         this.operatingSystem = os != null ? os : OS.UNKNOWN;
     }
 
+    void setTrailerCrc(final long trailerCrc) {
+        this.trailerCrc = trailerCrc;
+    }
+
+    void setTrailerISize(final long trailerISize) {
+        this.trailerISize = trailerISize;
+    }
+
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        builder.append("GzipParameters [compressionLevel=").append(compressionLevel).append(", modificationTime=").append(modificationTime)
-                .append(", fileName=").append(fileName).append(", comment=").append(comment).append(", operatingSystem=").append(operatingSystem)
-                .append(", bufferSize=").append(bufferSize).append(", deflateStrategy=").append(deflateStrategy).append("]");
+        builder.append("GzipParameters [bufferSize=").append(bufferSize).append(", comment=").append(comment).append(", compressionLevel=")
+                .append(compressionLevel).append(", deflateStrategy=").append(deflateStrategy).append(", extraField=").append(extraField).append(", fileName=")
+                .append(fileName).append(", fileNameCharset=").append(fileNameCharset).append(", headerCrc=").append(headerCrc).append(", modificationInstant=")
+                .append(modificationInstant).append(", operatingSystem=").append(operatingSystem).append(", trailerCrc=").append(trailerCrc)
+                .append(", trailerISize=").append(trailerISize).append("]");
         return builder.toString();
     }
 }

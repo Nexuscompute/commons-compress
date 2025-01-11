@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.commons.compress.harmony.unpack200;
 
@@ -184,7 +186,7 @@ public class CpBands extends BandSet {
     }
 
     public CPUTF8 cpSignatureValue(final int index) {
-        int globalIndex;
+        final int globalIndex;
         if (cpSignatureInts[index] != -1) {
             globalIndex = cpSignatureInts[index];
         } else {
@@ -310,7 +312,7 @@ public class CpBands extends BandSet {
 
     /**
      * Parses the constant pool descriptor definitions, using {@link #cpDescriptorCount} to populate {@link #cpDescriptor}. For ease of use, the cpDescriptor is
-     * stored as a string of the form <em>name:type</em>, largely to make it easier for representing field and method descriptors (e.g.
+     * stored as a string of the form <em>name:type</em>, largely to make it easier for representing field and method descriptors (for example
      * {@code out:java.lang.PrintStream}) in a way that is compatible with passing String arrays.
      *
      * @param in the input stream to read from
@@ -420,7 +422,7 @@ public class CpBands extends BandSet {
      * representation of a class; Z for boolean, I for int, [ for array etc. However, although classes are started with L, the class name does not follow the
      * form; instead, there is a separate array of classes. So an array corresponding to {@code public static void main(String args[])} has a form of
      * {@code [L(V)} and a classes array of {@code [java.lang.String]}. The {@link #cpSignature} is a string representation identical to the bytecode equivalent
-     * {@code [Ljava/lang/String;(V)} TODO Check that the form is as above and update other types e.g. J
+     * {@code [Ljava/lang/String;(V)} TODO Check that the form is as above and update other types for example J
      *
      * @param in the input stream to read from
      * @throws IOException      if a problem occurs during reading from the underlying stream

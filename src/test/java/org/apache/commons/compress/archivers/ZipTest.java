@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -184,32 +184,17 @@ public final class ZipTest extends AbstractTest {
     private File getFilesToZip() throws IOException {
         final File originalZipFile = getFile("COMPRESS-477/split_zip_created_by_zip/zip_to_compare_created_by_zip.zip");
         try (ZipFile zipFile = newZipFile(originalZipFile)) {
-            final Enumeration<ZipArchiveEntry> zipEntries = zipFile.getEntries();
-            ZipArchiveEntry zipEntry;
-            File outputFile;
-            byte[] buffer;
-            int readLen;
-
-            while (zipEntries.hasMoreElements()) {
-                zipEntry = zipEntries.nextElement();
-                if (zipEntry.isDirectory()) {
-                    continue;
+            zipFile.stream().filter(e -> !e.isDirectory()).forEach(zipEntry -> {
+                Path outputFile = newTempPath(zipEntry.getName());
+                if (!Files.exists(outputFile.getParent())) {
+                    Files.createDirectories(outputFile.getParent());
                 }
-
-                outputFile = newTempFile(zipEntry.getName());
-                if (!outputFile.getParentFile().exists()) {
-                    outputFile.getParentFile().mkdirs();
-                }
-                outputFile = newTempFile(zipEntry.getName());
-
+                outputFile = newTempPath(zipEntry.getName());
                 try (InputStream inputStream = zipFile.getInputStream(zipEntry);
-                        OutputStream outputStream = Files.newOutputStream(outputFile.toPath())) {
-                    buffer = new byte[(int) zipEntry.getSize()];
-                    while ((readLen = inputStream.read(buffer)) > 0) {
-                        outputStream.write(buffer, 0, readLen);
-                    }
+                        OutputStream outputStream = Files.newOutputStream(outputFile)) {
+                    IOUtils.copy(inputStream, outputStream);
                 }
-            }
+            });
         }
         return getTempDirFile().listFiles()[0];
     }
@@ -564,14 +549,12 @@ public final class ZipTest extends AbstractTest {
             in.forEach(entry -> readStream(in, entry, actualStatistics));
         }
         // file access
-        try (ZipFile zf = newZipFile(input)) {
-            final Enumeration<ZipArchiveEntry> entries = zf.getEntries();
-            while (entries.hasMoreElements()) {
-                final ZipArchiveEntry zae = entries.nextElement();
-                try (InputStream in = zf.getInputStream(zae)) {
+        try (ZipFile zipFile = newZipFile(input)) {
+            zipFile.stream().forEach(zae -> {
+                try (InputStream in = zipFile.getInputStream(zae)) {
                     readStream(in, zae, actualStatistics);
                 }
-            }
+            });
         }
         // compare statistics of stream / file access
         for (final Map.Entry<String, List<List<Long>>> me : actualStatistics.entrySet()) {
@@ -814,7 +797,7 @@ public final class ZipTest extends AbstractTest {
 
     @Test
     public void testZipArchiveEntryNewFromPath() throws Exception {
-        Path archivePath;
+        final Path archivePath;
         final File tmpFile = createTempFile();
         final Path tmpFilePath = tmpFile.toPath();
         final File archiveFile = createTempFile("test.", ".zip");

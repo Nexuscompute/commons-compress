@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -62,7 +62,7 @@ public class BlockLZ4CompressorInputStream extends AbstractLZ77CompressorInputSt
      * @return false if there is no more back-reference - this means this is the last block of the stream.
      */
     private boolean initializeBackReference() throws IOException {
-        int backReferenceOffset;
+        final int backReferenceOffset;
         try {
             backReferenceOffset = (int) ByteUtils.fromLittleEndian(supplier, 2);
         } catch (final IOException ex) {
@@ -101,7 +101,7 @@ public class BlockLZ4CompressorInputStream extends AbstractLZ77CompressorInputSt
             return -1;
         case NO_BLOCK: // NOSONAR - fallthrough intended
             readSizes();
-            /* FALLTHROUGH */
+            // falls-through
         case IN_LITERAL:
             final int litLen = readLiteral(b, off, len);
             if (!hasMoreDataInBlock()) {
@@ -113,7 +113,7 @@ public class BlockLZ4CompressorInputStream extends AbstractLZ77CompressorInputSt
                 state = State.EOF;
                 return -1;
             }
-            /* FALLTHROUGH */
+            // falls-through
         case IN_BACK_REFERENCE:
             final int backReferenceLen = readBackReference(b, off, len);
             if (!hasMoreDataInBlock()) {

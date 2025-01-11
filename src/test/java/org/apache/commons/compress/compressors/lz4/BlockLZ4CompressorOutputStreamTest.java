@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -52,15 +52,16 @@ public class BlockLZ4CompressorOutputStreamTest {
 
     private byte[] compress(final byte[] input, final int... lengthOfTrailers) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                BlockLZ4CompressorOutputStream lo = new BlockLZ4CompressorOutputStream(baos)) {
-            lo.write(input);
+                BlockLZ4CompressorOutputStream outputStream = new BlockLZ4CompressorOutputStream(baos)) {
+            outputStream.write(input);
             for (int i = 0; i < lengthOfTrailers.length; i++) {
                 final int lengthOfTrailer = lengthOfTrailers[i];
                 for (int j = 0; j < lengthOfTrailer; j++) {
-                    lo.write(i + 1);
+                    outputStream.write(i + 1);
                 }
             }
-            lo.close();
+            outputStream.close();
+            assertTrue(outputStream.isClosed());
             return baos.toByteArray();
         }
     }

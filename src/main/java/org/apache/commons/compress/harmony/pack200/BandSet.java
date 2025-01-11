@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.commons.compress.harmony.pack200;
 
@@ -55,8 +57,8 @@ public abstract class BandSet {
     }
 
     /**
-     * BandData represents information about a band, e.g. largest value etc and is used in the heuristics that calculate whether an alternative Codec could make
-     * the encoded band smaller.
+     * BandData represents information about a band, for example largest value etc and is used in the heuristics that calculate whether an alternative Codec
+     * could make the encoded band smaller.
      */
     public class BandData {
 
@@ -548,7 +550,7 @@ public abstract class BandSet {
         int tdefL = 0;
         int l = 0;
         Codec tokenCodec = null;
-        byte[] tokensEncoded;
+        final byte[] tokensEncoded;
         final int k = favored.size() - 1;
         if (k < 256) {
             tdefL = 1;
@@ -712,7 +714,7 @@ public abstract class BandSet {
             return results.numCodecsTried >= effort * 2;
         }
         return results.numCodecsTried >= effort;
-        // May want to also check how much we've saved if performance needs improving, e.g. saved more than effort*2 %
+        // May want to also check how much we've saved if performance needs improving, for example saved more than effort*2 %
         // || (float) results.saved/(float) results.encodedBand.length > (float) effort * 2/100;
     }
 

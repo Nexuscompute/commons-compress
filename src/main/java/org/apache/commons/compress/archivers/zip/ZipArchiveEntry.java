@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.commons.compress.archivers.zip;
 
@@ -736,7 +738,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         final List<ZipExtraField> centralFields = new ArrayList<>(Arrays.asList(parseExtraFields(central, false, parsingBehavior)));
         final List<ZipExtraField> merged = new ArrayList<>();
         for (final ZipExtraField l : localFields) {
-            ZipExtraField c;
+            final ZipExtraField c;
             if (l instanceof UnparseableExtraFieldData) {
                 c = findUnparseable(centralFields);
             } else {
@@ -1030,9 +1032,9 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     }
 
     /**
-     * Is this entry a directory?
+     * Tests whether this entry is a directory.
      *
-     * @return true if the entry is a directory
+     * @return true if the entry is a directory.
      */
     @Override
     public boolean isDirectory() {
@@ -1045,7 +1047,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     }
 
     /**
-     * Returns true if this entry represents a Unix symlink, in which case the entry's content contains the target path for the symlink.
+     * Tests whether this entry represents a Unix symlink, in which case the entry's content contains the target path for the symlink.
      *
      * @since 1.5
      * @return true if the entry represents a Unix symlink, false otherwise.

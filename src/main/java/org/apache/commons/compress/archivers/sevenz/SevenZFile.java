@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.commons.compress.archivers.sevenz;
 
@@ -93,7 +95,13 @@ public class SevenZFile implements Closeable {
         private int numberOfEntries;
         private int numberOfEntriesWithStream;
 
-        void assertValidity(final int maxMemoryLimitInKb) throws IOException {
+        /**
+         * Asserts the validity of the given input.
+         *
+         * @param maxMemoryLimitKiB kibibytes (KiB) to test.
+         * @throws IOException Thrown on basic assertion failure.
+         */
+        void assertValidity(final int maxMemoryLimitKiB) throws IOException {
             if (numberOfEntriesWithStream > 0 && numberOfFolders == 0) {
                 throw new IOException("archive with entries but no folders");
             }
@@ -101,9 +109,9 @@ public class SevenZFile implements Closeable {
                 throw new IOException("archive doesn't contain enough substreams for entries");
             }
 
-            final long memoryNeededInKb = estimateSize() / 1024;
-            if (maxMemoryLimitInKb < memoryNeededInKb) {
-                throw new MemoryLimitException(memoryNeededInKb, maxMemoryLimitInKb);
+            final long memoryNeededInKiB = estimateSize() / 1024;
+            if (maxMemoryLimitKiB < memoryNeededInKiB) {
+                throw new MemoryLimitException(memoryNeededInKiB, maxMemoryLimitKiB);
             }
         }
 
@@ -111,16 +119,31 @@ public class SevenZFile implements Closeable {
             return 16;
         }
 
+        /**
+         * Gets a size estimate in bytes.
+         *
+         * @return a size estimate in bytes.
+         */
         private long coderSize() {
             return 2 /* methodId is between 1 and four bytes currently, COPY and LZMA2 are the most common with 1 */
                     + 16 + 4 /* properties, guess */
             ;
         }
 
+        /**
+         * Gets a size estimate in bytes.
+         *
+         * @return a size estimate in bytes.
+         */
         private long entrySize() {
             return 100; /* real size depends on name length, everything without name is about 70 bytes */
         }
 
+        /**
+         * Gets a size estimate in bytes.
+         *
+         * @return a size estimate in bytes.
+         */
         long estimateSize() {
             final long lowerBound = 16L * numberOfPackedStreams /* packSizes, packCrcs in Archive */
                     + numberOfPackedStreams / 8 /* packCrcsDefined in Archive */
@@ -147,7 +170,7 @@ public class SevenZFile implements Closeable {
 
         @Override
         public String toString() {
-            return "Archive with " + numberOfEntries + " entries in " + numberOfFolders + " folders. Estimated size " + estimateSize() / 1024L + " kB.";
+            return String.format("Archive with %,d entries in %,d folders, estimated size %,d KiB.", numberOfEntries, numberOfFolders, estimateSize() / 1024L);
         }
     }
 
@@ -165,7 +188,7 @@ public class SevenZFile implements Closeable {
         private SeekableByteChannel seekableByteChannel;
         private String defaultName = DEFAULT_FILE_NAME;
         private byte[] password;
-        private int maxMemoryLimitKb = MEMORY_LIMIT_IN_KB;
+        private int maxMemoryLimitKiB = MEMORY_LIMIT_IN_KB;
         private boolean useDefaultNameForUnnamedEntries = USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES;
         private boolean tryToRecoverBrokenArchives = TRY_TO_RECOVER_BROKEN_ARCHIVES;
 
@@ -190,7 +213,7 @@ public class SevenZFile implements Closeable {
                 actualDescription = path.toAbsolutePath().toString();
             }
             final boolean closeOnError = seekableByteChannel != null;
-            return new SevenZFile(actualChannel, actualDescription, password, closeOnError, maxMemoryLimitKb, useDefaultNameForUnnamedEntries,
+            return new SevenZFile(actualChannel, actualDescription, password, closeOnError, maxMemoryLimitKiB, useDefaultNameForUnnamedEntries,
                     tryToRecoverBrokenArchives);
         }
 
@@ -211,11 +234,26 @@ public class SevenZFile implements Closeable {
          * Not all codecs honor this setting. Currently only LZMA and LZMA2 are supported.
          * </p>
          *
-         * @param maxMemoryLimitKb the max memory limit in kilobytes.
+         * @param maxMemoryLimitKiB the max memory limit in kilobytes.
          * @return {@code this} instance.
          */
-        public Builder setMaxMemoryLimitKb(final int maxMemoryLimitKb) {
-            this.maxMemoryLimitKb = maxMemoryLimitKb;
+        public Builder setMaxMemoryLimitKb(final int maxMemoryLimitKiB) {
+            this.maxMemoryLimitKiB = maxMemoryLimitKiB / 1024;
+            return this;
+        }
+
+        /**
+         * Sets the maximum amount of memory in kilobytes to use for parsing the archive and during extraction.
+         * <p>
+         * Not all codecs honor this setting. Currently only LZMA and LZMA2 are supported.
+         * </p>
+         *
+         * @param maxMemoryLimitKiB the max memory limit in kibibytes.
+         * @return {@code this} instance.
+         * @since 1.28.0
+         */
+        public Builder setMaxMemoryLimitKiB(final int maxMemoryLimitKiB) {
+            this.maxMemoryLimitKiB = maxMemoryLimitKiB;
             return this;
         }
 
@@ -411,7 +449,7 @@ public class SevenZFile implements Closeable {
     private long compressedBytesReadFromCurrentEntry;
     private long uncompressedBytesReadFromCurrentEntry;
     private final ArrayList<InputStream> deferredBlockStreams = new ArrayList<>();
-    private final int maxMemoryLimitKb;
+    private final int maxMemoryLimitKiB;
     private final boolean useDefaultNameForUnnamedEntries;
 
     private final boolean tryToRecoverBrokenArchives;
@@ -607,12 +645,12 @@ public class SevenZFile implements Closeable {
         this(channel, fileName, password, false, SevenZFileOptions.DEFAULT);
     }
 
-    private SevenZFile(final SeekableByteChannel channel, final String fileName, final byte[] password, final boolean closeOnError, final int maxMemoryLimitKb,
+    private SevenZFile(final SeekableByteChannel channel, final String fileName, final byte[] password, final boolean closeOnError, final int maxMemoryLimitKiB,
             final boolean useDefaultNameForUnnamedEntries, final boolean tryToRecoverBrokenArchives) throws IOException {
         boolean succeeded = false;
         this.channel = channel;
         this.fileName = fileName;
-        this.maxMemoryLimitKb = maxMemoryLimitKb;
+        this.maxMemoryLimitKiB = maxMemoryLimitKiB;
         this.useDefaultNameForUnnamedEntries = useDefaultNameForUnnamedEntries;
         this.tryToRecoverBrokenArchives = tryToRecoverBrokenArchives;
         try {
@@ -744,7 +782,7 @@ public class SevenZFile implements Closeable {
                 throw new IOException("Multi input/output stream coders are not yet supported");
             }
             final SevenZMethod method = SevenZMethod.byId(coder.decompressionMethodId);
-            inputStreamStack = Coders.addDecoder(fileName, inputStreamStack, folder.getUnpackSizeForCoder(coder), coder, password, maxMemoryLimitKb);
+            inputStreamStack = Coders.addDecoder(fileName, inputStreamStack, folder.getUnpackSizeForCoder(coder), coder, password, maxMemoryLimitKiB);
             methods.addFirst(new SevenZMethodConfiguration(method, Coders.findByMethod(method).getOptionsFromCoder(coder, inputStreamStack)));
         }
         entry.setContentMethods(methods);
@@ -1188,7 +1226,7 @@ public class SevenZFile implements Closeable {
         final int pos = header.position();
         final ArchiveStatistics stats = new ArchiveStatistics();
         sanityCheckStreamsInfo(header, stats);
-        stats.assertValidity(maxMemoryLimitKb);
+        stats.assertValidity(maxMemoryLimitKiB);
         header.position(pos);
 
         readStreamsInfo(header, archive);
@@ -1212,7 +1250,7 @@ public class SevenZFile implements Closeable {
                 throw new IOException("Multi input/output stream coders are not yet supported");
             }
             inputStreamStack = Coders.addDecoder(fileName, inputStreamStack, // NOSONAR
-                    folder.getUnpackSizeForCoder(coder), coder, password, maxMemoryLimitKb);
+                    folder.getUnpackSizeForCoder(coder), coder, password, maxMemoryLimitKiB);
         }
         if (folder.hasCrc) {
             // @formatter:off
@@ -1458,7 +1496,7 @@ public class SevenZFile implements Closeable {
     private void readHeader(final ByteBuffer header, final Archive archive) throws IOException {
         final int pos = header.position();
         final ArchiveStatistics stats = sanityCheckAndCollectStatistics(header);
-        stats.assertValidity(maxMemoryLimitKb);
+        stats.assertValidity(maxMemoryLimitKiB);
         header.position(pos);
 
         int nid = getUnsignedByte(header);

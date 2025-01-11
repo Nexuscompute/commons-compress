@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -48,7 +48,7 @@ import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
  * String contents = &quot;12345&quot;;
  * entry.setFileSize(contents.length());
  * entry.setMode(CpioConstants.C_ISREG); // regular file
- * ... set other attributes, e.g. time, number of links
+ * ... set other attributes, for example time, number of links
  * out.putArchiveEntry(entry);
  * out.write(testContents.getBytes());
  * out.close();
@@ -175,9 +175,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream<CpioArchiveEntr
                 finish();
             }
         } finally {
-            if (!isClosed()) {
-                super.close();
-            }
+            super.close();
         }
     }
 

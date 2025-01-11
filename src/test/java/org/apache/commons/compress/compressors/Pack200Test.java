@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -193,9 +193,11 @@ public final class Pack200Test extends AbstractTest {
         final Map<String, String> m = new HashMap<>();
         m.put("foo", "bar");
         try (OutputStream out = Files.newOutputStream(output.toPath());
-                OutputStream os = new Pack200CompressorOutputStream(out, m)) {
+                Pack200CompressorOutputStream os = new Pack200CompressorOutputStream(out, m)) {
             os.write(1);
             os.write(new byte[] { 2, 3 });
+            os.close();
+            assertTrue(os.isClosed());
         }
     }
 

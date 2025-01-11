@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 /*
@@ -37,8 +39,8 @@ import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipEncoding;
 import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
 import org.apache.commons.compress.utils.ArchiveUtils;
-import org.apache.commons.compress.utils.BoundedInputStream;
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 
 /**
  * The TarInputStream reads a Unix tar archive as an InputStream. methods are provided to position at each successive entry in the archive, and the read each
@@ -262,20 +264,26 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
                 // sparse header says to move backwards inside the extracted entry
                 throw new IOException("Corrupted struct sparse detected");
             }
-
             // only store the zero block if it is not empty
             if (zeroBlockSize > 0) {
-                sparseInputStreams.add(new BoundedInputStream(zeroInputStream, sparseHeader.getOffset() - offset));
+                // @formatter:off
+                sparseInputStreams.add(BoundedInputStream.builder()
+                        .setInputStream(zeroInputStream)
+                        .setMaxCount(sparseHeader.getOffset() - offset)
+                        .get());
+                // @formatter:on
             }
-
             // only store the input streams with non-zero size
             if (sparseHeader.getNumbytes() > 0) {
-                sparseInputStreams.add(new BoundedInputStream(in, sparseHeader.getNumbytes()));
+                // @formatter:off
+                sparseInputStreams.add(BoundedInputStream.builder()
+                        .setInputStream(in)
+                        .setMaxCount(sparseHeader.getNumbytes())
+                        .get());
+                // @formatter:on
             }
-
             offset = sparseHeader.getOffset() + sparseHeader.getNumbytes();
         }
-
         if (!sparseInputStreams.isEmpty()) {
             currentSparseInputStreamIndex = 0;
         }
@@ -513,6 +521,11 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
         return recordBuffer.length;
     }
 
+    /**
+     * Tests whether we are at the end-of-file.
+     *
+     * @return whether we are at the end-of-file.
+     */
     protected final boolean isAtEOF() {
         return atEof;
     }
@@ -746,12 +759,23 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
      */
     @Override
     public synchronized void reset() {
+        // empty
     }
 
+    /**
+     * Sets whether we are at the end-of-file.
+     *
+     * @param atEof whether we are at the end-of-file.
+     */
     protected final void setAtEOF(final boolean atEof) {
         this.atEof = atEof;
     }
 
+    /**
+     * Sets the current entry.
+     *
+     * @param currEntry the current entry.
+     */
     protected final void setCurrentEntry(final TarArchiveEntry currEntry) {
         this.currEntry = currEntry;
     }

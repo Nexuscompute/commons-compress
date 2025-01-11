@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -46,6 +46,8 @@ public class FramedLZ4CompressorOutputStreamTest {
                 new FramedLZ4CompressorOutputStream.Parameters(FramedLZ4CompressorOutputStream.BlockSize.K64, true, false, false))) {
             compressor.write(bytes);
             compressor.finish();
+            compressor.close();
+            assertTrue(compressor.isClosed());
         }
         final byte[] bulkOutput = buffer.toByteArray();
         buffer = new ByteArrayOutputStream();
@@ -55,6 +57,8 @@ public class FramedLZ4CompressorOutputStreamTest {
                 compressor.write(element);
             }
             compressor.finish();
+            compressor.close();
+            assertTrue(compressor.isClosed());
         }
         assertTrue(Arrays.equals(bulkOutput, buffer.toByteArray()));
     }

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -104,8 +104,6 @@ public class SnappyCompressorOutputStream extends CompressorOutputStream<OutputS
     // used in one-arg write method
     private final byte[] oneByte = new byte[1];
 
-    private boolean finished;
-
     /**
      * Constructor using the default block size of 32k.
      *
@@ -160,7 +158,7 @@ public class SnappyCompressorOutputStream extends CompressorOutputStream<OutputS
         try {
             finish();
         } finally {
-            out.close();
+            super.close();
         }
     }
 
@@ -169,10 +167,11 @@ public class SnappyCompressorOutputStream extends CompressorOutputStream<OutputS
      *
      * @throws IOException if an error occurs
      */
+    @Override
     public void finish() throws IOException {
-        if (!finished) {
+        if (!isFinished()) {
             compressor.finish();
-            finished = true;
+            super.finish();
         }
     }
 

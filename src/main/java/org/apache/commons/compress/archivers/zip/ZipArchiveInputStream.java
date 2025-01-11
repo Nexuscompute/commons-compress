@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -184,13 +184,13 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
 
     /*
      * local file header signature WORD version needed to extract SHORT general purpose bit flag SHORT compression method SHORT last mod file time SHORT last
-     * mod file date SHORT crc-32 WORD compressed size WORD uncompressed size WORD file name length SHORT extra field length SHORT
+     * mod file date SHORT CRC-32 WORD compressed size WORD uncompressed size WORD file name length SHORT extra field length SHORT
      */
     private static final int CFH_LEN = 46;
 
     /*
      * central file header signature WORD version made by SHORT version needed to extract SHORT general purpose bit flag SHORT compression method SHORT last mod
-     * file time SHORT last mod file date SHORT crc-32 WORD compressed size WORD uncompressed size WORD file name length SHORT extra field length SHORT file
+     * file time SHORT last mod file date SHORT CRC-32 WORD compressed size WORD uncompressed size WORD file name length SHORT extra field length SHORT file
      * comment length SHORT disk number start SHORT internal file attributes SHORT external file attributes WORD relative offset of local header WORD
      */
     private static final long TWO_EXP_32 = ZIP64_MAGIC + 1;
@@ -210,7 +210,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
 
     private static final BigInteger LONG_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
-    private static boolean checksig(final byte[] expected, final byte[] signature) {
+    private static boolean checkSig(final byte[] expected, final byte[] signature) {
         for (int i = 0; i < expected.length; i++) {
             if (signature[i] != expected[i]) {
                 return false;
@@ -231,10 +231,10 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
             return false;
         }
 
-        return checksig(ZipArchiveOutputStream.LFH_SIG, signature) // normal file
-                || checksig(ZipArchiveOutputStream.EOCD_SIG, signature) // empty zip
-                || checksig(ZipArchiveOutputStream.DD_SIG, signature) // split zip
-                || checksig(ZipLong.SINGLE_SEGMENT_SPLIT_MARKER.getBytes(), signature);
+        return checkSig(ZipArchiveOutputStream.LFH_SIG, signature) // normal file
+                || checkSig(ZipArchiveOutputStream.EOCD_SIG, signature) // empty zip
+                || checkSig(ZipArchiveOutputStream.DD_SIG, signature) // split zip
+                || checkSig(ZipLong.SINGLE_SEGMENT_SPLIT_MARKER.getBytes(), signature);
     }
 
     /** The ZIP encoding to use for file names and the file comment. */
@@ -703,7 +703,8 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
         current.entry.setTime(time);
         off += WORD;
 
-        ZipLong size = null, cSize = null;
+        ZipLong size = null;
+        ZipLong cSize = null;
         if (!current.hasDataDescriptor) {
             current.entry.setCrc(ZipLong.getValue(lfhBuf, off));
             off += WORD;

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -19,6 +19,7 @@
 package org.apache.commons.compress.compressors.lz4;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -76,13 +77,15 @@ public final class FramedLZ4CompressorRoundtripTest extends AbstractTest {
 
     private void roundTripTest(final String testFile, final FramedLZ4CompressorOutputStream.Parameters params) throws IOException {
         final File input = getFile(testFile);
-        byte[] expected;
+        final byte[] expected;
         try (InputStream is = Files.newInputStream(input.toPath())) {
             expected = IOUtils.toByteArray(is);
         }
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (FramedLZ4CompressorOutputStream los = new FramedLZ4CompressorOutputStream(bos, params)) {
             IOUtils.copy(new ByteArrayInputStream(expected), los);
+            los.close();
+            assertTrue(los.isClosed());
         }
         try (FramedLZ4CompressorInputStream sis = new FramedLZ4CompressorInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
             final byte[] actual = IOUtils.toByteArray(sis);

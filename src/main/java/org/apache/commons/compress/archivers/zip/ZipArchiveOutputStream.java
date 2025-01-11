@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.commons.compress.archivers.zip;
 
@@ -482,7 +484,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
     /**
      * Adds an archive entry with a raw input stream.
      * <p>
-     * If crc, size and compressed size are supplied on the entry, these values will be used as-is. Zip64 status is re-established based on the settings in this
+     * If CRC, size and compressed size are supplied on the entry, these values will be used as-is. Zip64 status is re-established based on the settings in this
      * stream, and the supplied value is ignored.
      * </p>
      * <p>
@@ -904,7 +906,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
      */
     void destroy() throws IOException {
         if (out != null) {
-            out.close();
+            super.close();
         }
     }
 
@@ -1347,10 +1349,10 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
      * Defaults to false.
      * </p>
      *
-     * @param b whether to fall back to UTF and the language encoding flag if the file name cannot be encoded using the specified encoding.
+     * @param fallbackToUTF8 whether to fall back to UTF and the language encoding flag if the file name cannot be encoded using the specified encoding.
      */
-    public void setFallbackToUTF8(final boolean b) {
-        fallbackToUTF8 = b;
+    public void setFallbackToUTF8(final boolean fallbackToUTF8) {
+        this.fallbackToUTF8 = fallbackToUTF8;
     }
 
     /**

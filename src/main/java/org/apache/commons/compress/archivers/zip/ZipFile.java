@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.commons.compress.archivers.zip;
 
@@ -61,6 +63,7 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.build.AbstractOrigin.ByteArrayOrigin;
 import org.apache.commons.io.build.AbstractStreamBuilder;
+import org.apache.commons.io.function.IOStream;
 import org.apache.commons.io.input.BoundedInputStream;
 
 /**
@@ -283,7 +286,7 @@ public class ZipFile implements Closeable {
         /* compression method              */ + ZipConstants.SHORT
         /* last mod file time              */ + ZipConstants.SHORT
         /* last mod file date              */ + ZipConstants.SHORT
-        /* crc-32                          */ + ZipConstants.WORD
+        /* CRC-32                          */ + ZipConstants.WORD
         /* compressed size                 */ + ZipConstants.WORD
         /* uncompressed size               */ + ZipConstants.WORD
         /* file name length                */ + ZipConstants. SHORT
@@ -452,7 +455,7 @@ public class ZipFile implements Closeable {
         /* compression method              */ + ZipConstants.SHORT
         /* last mod file time              */ + ZipConstants.SHORT
         /* last mod file date              */ + ZipConstants.SHORT
-        /* crc-32                          */ + ZipConstants.WORD
+        /* CRC-32                          */ + ZipConstants.WORD
         /* compressed size                 */ + ZipConstants.WORD
         /* uncompressed size               */ + (long) ZipConstants.WORD;
     // @formatter:on
@@ -502,7 +505,7 @@ public class ZipFile implements Closeable {
         final FileChannel channel = FileChannel.open(path, StandardOpenOption.READ);
         try {
             final boolean is64 = positionAtEndOfCentralDirectoryRecord(channel);
-            long numberOfDisks;
+            final long numberOfDisks;
             if (is64) {
                 channel.position(channel.position() + ZipConstants.WORD + ZipConstants.WORD + ZipConstants.DWORD);
                 final ByteBuffer buf = ByteBuffer.allocate(ZipConstants.WORD);
@@ -716,7 +719,9 @@ public class ZipFile implements Closeable {
 
     private final ByteBuffer shortBbuf = ByteBuffer.wrap(shortBuf);
 
-    private long centralDirectoryStartDiskNumber, centralDirectoryStartRelativeOffset;
+    private long centralDirectoryStartDiskNumber;
+
+    private long centralDirectoryStartRelativeOffset;
 
     private long centralDirectoryStartOffset;
 
@@ -1701,4 +1706,19 @@ public class ZipFile implements Closeable {
         IOUtils.readFully(archive, wordBbuf);
         return Arrays.equals(wordBuf, ZipArchiveOutputStream.LFH_SIG);
     }
+
+    /**
+     * Returns an ordered {@code Stream} over the ZIP file entries.
+     * <p>
+     * Entries appear in the {@code Stream} in the order they appear in the central directory of the ZIP file.
+     * </p>
+     *
+     * @return an ordered {@code Stream} of entries in this ZIP file.
+     * @throws IllegalStateException if the ZIP file has been closed.
+     * @since 1.28.0
+     */
+    public IOStream<? extends ZipArchiveEntry> stream() {
+        return IOStream.adapt(entries.stream());
+    }
+
 }

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -108,7 +108,8 @@ public class FramedSnappyCompressorInputStream extends CompressorInputStream imp
 
     // used in no-arg read method
     private final byte[] oneByte = new byte[1];
-    private boolean endReached, inUncompressedChunk;
+    private boolean endReached;
+    private boolean inUncompressedChunk;
     private int uncompressedBytesRemaining;
     private long expectedChecksum = -1;
 

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -31,7 +31,7 @@ import org.apache.commons.compress.utils.ParsingUtils;
 
 /**
  * CpioArchiveInputStream is a stream for reading cpio streams. All formats of cpio are supported (old ascii, old binary, new portable format and the new
- * portable format with crc).
+ * portable format with CRC).
  * <p>
  * The stream can be read by extracting a cpio entry (containing all information about an entry) and afterwards reading from the stream the file specified by
  * the entry.
@@ -82,15 +82,10 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
         if (length < 6) {
             return false;
         }
-
         // Check binary values
-        if (signature[0] == 0x71 && (signature[1] & 0xFF) == 0xc7) {
+        if (signature[0] == 0x71 && (signature[1] & 0xFF) == 0xc7 || signature[1] == 0x71 && (signature[0] & 0xFF) == 0xc7) {
             return true;
         }
-        if (signature[1] == 0x71 && (signature[0] & 0xFF) == 0xc7) {
-            return true;
-        }
-
         // Check Ascii (String) values
         // 3037 3037 30nn
         if (signature[0] != 0x30) {
@@ -118,7 +113,6 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
         if (signature[5] == 0x37) {
             return true;
         }
-
         return false;
     }
 
@@ -130,17 +124,17 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
 
     private boolean entryEOF;
 
-    private final byte[] tmpbuf = new byte[4096];
+    private final byte[] tmpBuf = new byte[4096];
 
     private long crc;
 
     /** Cached buffer - must only be used locally in the class (COMPRESS-172 - reduce garbage collection). */
-    private final byte[] twoBytesBuf = new byte[2];
+    private final byte[] buffer2 = new byte[2];
 
     /** Cached buffer - must only be used locally in the class (COMPRESS-172 - reduce garbage collection). */
-    private final byte[] fourBytesBuf = new byte[4];
+    private final byte[] buffer4 = new byte[4];
 
-    private final byte[] sixBytesBuf = new byte[6];
+    private final byte[] buffer6 = new byte[6];
 
     private final int blockSize;
 
@@ -267,15 +261,15 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
         if (this.entry != null) {
             closeEntry();
         }
-        readFully(twoBytesBuf, 0, twoBytesBuf.length);
-        if (CpioUtil.byteArray2long(twoBytesBuf, false) == MAGIC_OLD_BINARY) {
+        readFully(buffer2, 0, buffer2.length);
+        if (CpioUtil.byteArray2long(buffer2, false) == MAGIC_OLD_BINARY) {
             this.entry = readOldBinaryEntry(false);
-        } else if (CpioUtil.byteArray2long(twoBytesBuf, true) == MAGIC_OLD_BINARY) {
+        } else if (CpioUtil.byteArray2long(buffer2, true) == MAGIC_OLD_BINARY) {
             this.entry = readOldBinaryEntry(true);
         } else {
-            System.arraycopy(twoBytesBuf, 0, sixBytesBuf, 0, twoBytesBuf.length);
-            readFully(sixBytesBuf, twoBytesBuf.length, fourBytesBuf.length);
-            final String magicString = ArchiveUtils.toAsciiString(sixBytesBuf);
+            System.arraycopy(buffer2, 0, buffer6, 0, buffer2.length);
+            readFully(buffer6, buffer2.length, buffer4.length);
+            final String magicString = ArchiveUtils.toAsciiString(buffer6);
             switch (magicString) {
             case MAGIC_NEW:
                 this.entry = readNewEntry(false);
@@ -331,7 +325,10 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
             return -1;
         }
         if (this.entryBytesRead == this.entry.getSize()) {
-            skip(entry.getDataPadCount());
+            final int dataPadCount = entry.getDataPadCount();
+            if (skip(dataPadCount) != dataPadCount) {
+                throw new IOException("Data pad count missmatch.");
+            }
             this.entryEOF = true;
             if (this.entry.getFormat() == FORMAT_NEW_CRC && this.crc != this.entry.getChksum()) {
                 throw new IOException("CRC Error. Occurred at byte: " + getBytesRead());
@@ -386,44 +383,45 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
     }
 
     private CpioArchiveEntry readNewEntry(final boolean hasCrc) throws IOException {
-        final CpioArchiveEntry ret;
+        final CpioArchiveEntry newEntry;
         if (hasCrc) {
-            ret = new CpioArchiveEntry(FORMAT_NEW_CRC);
+            newEntry = new CpioArchiveEntry(FORMAT_NEW_CRC);
         } else {
-            ret = new CpioArchiveEntry(FORMAT_NEW);
+            newEntry = new CpioArchiveEntry(FORMAT_NEW);
         }
-
-        ret.setInode(readAsciiLong(8, 16));
+        newEntry.setInode(readAsciiLong(8, 16));
         final long mode = readAsciiLong(8, 16);
         if (CpioUtil.fileType(mode) != 0) { // mode is initialized to 0
-            ret.setMode(mode);
+            newEntry.setMode(mode);
         }
-        ret.setUID(readAsciiLong(8, 16));
-        ret.setGID(readAsciiLong(8, 16));
-        ret.setNumberOfLinks(readAsciiLong(8, 16));
-        ret.setTime(readAsciiLong(8, 16));
-        ret.setSize(readAsciiLong(8, 16));
-        if (ret.getSize() < 0) {
+        newEntry.setUID(readAsciiLong(8, 16));
+        newEntry.setGID(readAsciiLong(8, 16));
+        newEntry.setNumberOfLinks(readAsciiLong(8, 16));
+        newEntry.setTime(readAsciiLong(8, 16));
+        newEntry.setSize(readAsciiLong(8, 16));
+        if (newEntry.getSize() < 0) {
             throw new IOException("Found illegal entry with negative length");
         }
-        ret.setDeviceMaj(readAsciiLong(8, 16));
-        ret.setDeviceMin(readAsciiLong(8, 16));
-        ret.setRemoteDeviceMaj(readAsciiLong(8, 16));
-        ret.setRemoteDeviceMin(readAsciiLong(8, 16));
+        newEntry.setDeviceMaj(readAsciiLong(8, 16));
+        newEntry.setDeviceMin(readAsciiLong(8, 16));
+        newEntry.setRemoteDeviceMaj(readAsciiLong(8, 16));
+        newEntry.setRemoteDeviceMin(readAsciiLong(8, 16));
         final long namesize = readAsciiLong(8, 16);
         if (namesize < 0) {
             throw new IOException("Found illegal entry with negative name length");
         }
-        ret.setChksum(readAsciiLong(8, 16));
+        newEntry.setChksum(readAsciiLong(8, 16));
         final String name = readCString((int) namesize);
-        ret.setName(name);
+        newEntry.setName(name);
         if (CpioUtil.fileType(mode) == 0 && !name.equals(CPIO_TRAILER)) {
             throw new IOException(
                     "Mode 0 only allowed in the trailer. Found entry name: " + ArchiveUtils.sanitize(name) + " Occurred at byte: " + getBytesRead());
         }
-        skip(ret.getHeaderPadCount(namesize - 1));
-
-        return ret;
+        final int headerPadCount = newEntry.getHeaderPadCount(namesize - 1);
+        if (skip(headerPadCount) != headerPadCount) {
+            throw new IOException("Header pad count mismatch.");
+        }
+        return newEntry;
     }
 
     private CpioArchiveEntry readOldAsciiEntry() throws IOException {
@@ -458,35 +456,36 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
     }
 
     private CpioArchiveEntry readOldBinaryEntry(final boolean swapHalfWord) throws IOException {
-        final CpioArchiveEntry ret = new CpioArchiveEntry(FORMAT_OLD_BINARY);
-
-        ret.setDevice(readBinaryLong(2, swapHalfWord));
-        ret.setInode(readBinaryLong(2, swapHalfWord));
+        final CpioArchiveEntry oldEntry = new CpioArchiveEntry(FORMAT_OLD_BINARY);
+        oldEntry.setDevice(readBinaryLong(2, swapHalfWord));
+        oldEntry.setInode(readBinaryLong(2, swapHalfWord));
         final long mode = readBinaryLong(2, swapHalfWord);
         if (CpioUtil.fileType(mode) != 0) {
-            ret.setMode(mode);
+            oldEntry.setMode(mode);
         }
-        ret.setUID(readBinaryLong(2, swapHalfWord));
-        ret.setGID(readBinaryLong(2, swapHalfWord));
-        ret.setNumberOfLinks(readBinaryLong(2, swapHalfWord));
-        ret.setRemoteDevice(readBinaryLong(2, swapHalfWord));
-        ret.setTime(readBinaryLong(4, swapHalfWord));
+        oldEntry.setUID(readBinaryLong(2, swapHalfWord));
+        oldEntry.setGID(readBinaryLong(2, swapHalfWord));
+        oldEntry.setNumberOfLinks(readBinaryLong(2, swapHalfWord));
+        oldEntry.setRemoteDevice(readBinaryLong(2, swapHalfWord));
+        oldEntry.setTime(readBinaryLong(4, swapHalfWord));
         final long namesize = readBinaryLong(2, swapHalfWord);
         if (namesize < 0) {
             throw new IOException("Found illegal entry with negative name length");
         }
-        ret.setSize(readBinaryLong(4, swapHalfWord));
-        if (ret.getSize() < 0) {
+        oldEntry.setSize(readBinaryLong(4, swapHalfWord));
+        if (oldEntry.getSize() < 0) {
             throw new IOException("Found illegal entry with negative length");
         }
         final String name = readCString((int) namesize);
-        ret.setName(name);
+        oldEntry.setName(name);
         if (CpioUtil.fileType(mode) == 0 && !name.equals(CPIO_TRAILER)) {
             throw new IOException("Mode 0 only allowed in the trailer. Found entry: " + ArchiveUtils.sanitize(name) + "Occurred at byte: " + getBytesRead());
         }
-        skip(ret.getHeaderPadCount(namesize - 1));
-
-        return ret;
+        final int headerPadCount = oldEntry.getHeaderPadCount(namesize - 1);
+        if (skip(headerPadCount) != headerPadCount) {
+            throw new IOException("Header pad count mismatch.");
+        }
+        return oldEntry;
     }
 
     private byte[] readRange(final int len) throws IOException {
@@ -498,11 +497,9 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
         return b;
     }
 
-    private void skip(final int bytes) throws IOException {
+    private int skip(final int length) throws IOException {
         // bytes cannot be more than 3 bytes
-        if (bytes > 0) {
-            readFully(fourBytesBuf, 0, bytes);
-        }
+        return length > 0 ? readFully(buffer4, 0, length) : 0;
     }
 
     /**
@@ -524,10 +521,10 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
 
         while (total < max) {
             int len = max - total;
-            if (len > this.tmpbuf.length) {
-                len = this.tmpbuf.length;
+            if (len > this.tmpBuf.length) {
+                len = this.tmpBuf.length;
             }
-            len = read(this.tmpbuf, 0, len);
+            len = read(this.tmpBuf, 0, len);
             if (len == -1) {
                 this.entryEOF = true;
                 break;

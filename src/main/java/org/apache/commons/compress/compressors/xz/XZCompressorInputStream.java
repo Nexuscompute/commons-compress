@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -134,7 +134,7 @@ public class XZCompressorInputStream extends CompressorInputStream implements In
             count(ret == -1 ? -1 : 1);
             return ret;
         } catch (final org.tukaani.xz.MemoryLimitException e) {
-            throw new MemoryLimitException(e.getMemoryNeeded(), e.getMemoryLimit(), e);
+            throw new MemoryLimitException(e.getMemoryNeeded(), e.getMemoryLimit(), (Throwable) e);
         }
     }
 
@@ -149,7 +149,7 @@ public class XZCompressorInputStream extends CompressorInputStream implements In
             return ret;
         } catch (final org.tukaani.xz.MemoryLimitException e) {
             // convert to commons-compress MemoryLimtException
-            throw new MemoryLimitException(e.getMemoryNeeded(), e.getMemoryLimit(), e);
+            throw new MemoryLimitException(e.getMemoryNeeded(), e.getMemoryLimit(), (Throwable) e);
         }
     }
 
@@ -159,7 +159,7 @@ public class XZCompressorInputStream extends CompressorInputStream implements In
             return org.apache.commons.io.IOUtils.skip(in, n);
         } catch (final org.tukaani.xz.MemoryLimitException e) {
             // convert to commons-compress MemoryLimtException
-            throw new MemoryLimitException(e.getMemoryNeeded(), e.getMemoryLimit(), e);
+            throw new MemoryLimitException(e.getMemoryNeeded(), e.getMemoryLimit(), (Throwable) e);
         }
     }
 }

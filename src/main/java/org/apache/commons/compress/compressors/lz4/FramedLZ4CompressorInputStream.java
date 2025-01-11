@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -105,7 +105,8 @@ public class FramedLZ4CompressorInputStream extends CompressorInputStream implem
 
     private InputStream currentBlock;
 
-    private boolean endReached, inUncompressed;
+    private boolean endReached;
+    private boolean inUncompressed;
 
     /** Used for frame header checksum and content checksum, if present. */
     private final org.apache.commons.codec.digest.XXHash32 contentHash = new org.apache.commons.codec.digest.XXHash32();

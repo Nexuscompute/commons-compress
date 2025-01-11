@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -228,7 +228,8 @@ public class BZip2CompressorInputStream extends CompressorInputStream implements
     private BitInputStream bin;
     private final boolean decompressConcatenated;
     private int currentState = START_BLOCK_STATE;
-    private int storedBlockCRC, storedCombinedCRC;
+    private int storedBlockCRC;
+    private int storedCombinedCRC;
     private int computedCombinedCRC;
     private int su_count;
     private int su_ch2;
@@ -526,7 +527,7 @@ public class BZip2CompressorInputStream extends CompressorInputStream implements
         final int magic2 = readNextByte(this.bin);
 
         if (magic0 != 'B' || magic1 != 'Z' || magic2 != 'h') {
-            throw new IOException(isFirstStream ? "Stream is not in the BZip2 format" : "Garbage after a valid BZip2 stream");
+            throw new IOException(isFirstStream ? "Stream is not in the BZip2 format" : "Unexpected data after a valid BZip2 stream");
         }
 
         final int blockSize = readNextByte(this.bin);

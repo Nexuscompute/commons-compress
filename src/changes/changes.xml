@@ -35,9 +35,9 @@ mvn changes:announcement-generate -Prelease-notes [-Dchanges.version=m.n]
 
 The <action> type attribute can be add,update,fix,remove.
 -->
-<document xmlns="http://maven.apache.org/changes/1.0.0"
+<document xmlns="http://maven.apache.org/changes/2.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <properties>
     <title>Apache Commons Compress Release Notes</title>
   </properties>
@@ -45,7 +45,7 @@ The <action> type attribute can be add,update,fix,remove.
     <release version="1.28.0" date="YYYY-MM-DD" description="This is a feature and maintenance release. Java 8 or later is required.">
       <!-- FIX -->
       <action type="fix" issue="COMPRESS-686" dev="ggregory" due-to="Richard Blank, Gary Gregory">Better exception messages in SeekableInMemoryByteChannel.</action>
-      <action type="fix" dev="ggregory" due-to="yujincheng08, Gary Gregory">ZipArchiveOutputStream.addRawArchiveEntry() should check is2PhaseSource #571.</action> 
+      <action type="fix" issue="COMPRESS-691" dev="ggregory" due-to="yujincheng08, Gary Gregory">ZipArchiveOutputStream.addRawArchiveEntry() should check is2PhaseSource #571.</action> 
       <action type="fix" dev="ggregory" due-to="Gary Gregory, Arturo Bernal">ArchiveException extends IOException #605, see also https://github.com/apache/httpcomponents-client/pull/580.</action> 
       <action type="fix" dev="ggregory" due-to="Gary Gregory, Arturo Bernal">CompressorException extends IOException #605, see also https://github.com/apache/httpcomponents-client/pull/580.</action>
       <action type="fix" dev="ggregory" due-to="Glavo">Update outdated descriptions in IOUtils and IOUtilsTest #612.</action>
@@ -55,6 +55,17 @@ The <action> type attribute can be add,update,fix,remove.
       <action type="fix" dev="ggregory" due-to="ddeschenes-1, Gary Gregory">Throw an IllegalArgumentException when a file name or comment in gzip parameters encodes to a byte array with a 0 byte #618.</action>
       <action type="fix" dev="ggregory" due-to="Glavo">Update outdated links in ZipMethod Javadoc #619.</action>
       <action type="fix" dev="ggregory" due-to="Gary Gregory">Deprecate ZipUtil.signedByteToUnsignedInt(byte) in favor of Byte.toUnsignedInt(byte).</action> 
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">ZipArchiveOutputStream.close() does not close its underlying output stream.</action> 
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">ZipArchiveOutputStream.close() does not close its underlying output stream.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Don't use deprecated code in TarArchiveInputStream.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Don't use deprecated code in TarFile.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">CpioArchiveInputStream.read(byte[], int, int) now throws an IOException on a data pad count mismatch.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">CpioArchiveInputStream.readNewEntry(boolean) now throws an IOException on a header pad count mismatch.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">CpioArchiveInputStream.readOldBinaryEntry(boolean) now throws an IOException on a header pad count mismatch.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix Javadoc and names in the org.apache.commons.compress.archivers.sevenz package to specify kibibyte scale in memory limits.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix Javadoc and names in the org.apache.commons.compress.compressors.lzw package to specify kibibyte scale in memory limits.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix Javadoc and names in the org.apache.commons.compress.compressors.z package to specify kibibyte scale in memory limits.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Refactor LZ77Compressor block classes to reduce duplication.</action>
       <!-- ADD -->
       <action type="add" dev="ggregory" due-to="Gary Gregory">Add GzipParameters.getModificationInstant().</action>
       <action type="add" dev="ggregory" due-to="Gary Gregory">Add GzipParameters.setModificationInstant(Instant).</action>
@@ -63,15 +74,27 @@ The <action> type attribute can be add,update,fix,remove.
       <action type="add" dev="ggregory" issue="COMPRESS-638" due-to="vincexjl, Gary Gregory, Piotr P. Karwasz">Add GzipParameters.setFileNameCharset(Charset) and getFileNameCharset() to override the default ISO-8859-1 Charset #602.</action>
       <action type="add" dev="ggregory" due-to="ddeschenes-1, Gary Gregory">Add support for gzip extra subfields, see GzipParameters.setExtra(HeaderExtraField) #604.</action>
       <action type="add" dev="ggregory" due-to="Gary Gregory">Add CompressFilterOutputStream and refactor to use.</action>
+      <action type="add" dev="ggregory" due-to="Gary Gregory">Add ZipFile.stream().</action>
+      <action type="add" dev="ggregory" due-to="Danny Deschenes, Gary Gregory">GzipCompressorInputStream reads the modification time (MTIME) and stores its value incorrectly multiplied by 1,000.</action>
+      <action type="add" dev="ggregory" due-to="Danny Deschenes, Gary Gregory">GzipCompressorInputStream writes the modification time (MTIME) the value incorrectly divided by 1,000.</action>
+      <action type="add" dev="ggregory" due-to="Danny Deschenes, Gary Gregory">Add optional FHCRC to GZIP header #627.</action>
+      <action type="add" dev="ggregory" due-to="Gary Gregory">Add GzipCompressorInputStream.Builder allowing to customize the file name and comment Charsets.</action>
+      <action type="add" dev="ggregory" due-to="Gary Gregory">Add GzipCompressorInputStream.Builder.setOnMemberStart(IOConsumer) to monitor member parsing.</action>
+      <action type="add" dev="ggregory" due-to="Gary Gregory">Add GzipCompressorInputStream.Builder.setOnMemberEnd(IOConsumer) to monitor member parsing.</action>
+      <action type="add" dev="ggregory" due-to="Gary Gregory">Add PMD check to default Maven goal.</action>
+      <action type="add" dev="ggregory" due-to="Gary Gregory">Add SevenZFile.Builder.setMaxMemoryLimitKiB(int).</action>
+      <action type="add" dev="ggregory" due-to="Gary Gregory">Add MemoryLimitException.MemoryLimitException(long, int, Throwable) and deprecate MemoryLimitException.MemoryLimitException(long, int, Exception).</action>
       <!-- UPDATE -->
-      <action type="update" dev="ggregory" due-to="Dependabot, Gary Gregory">Bump org.apache.commons:commons-parent from 72 to 78 #563, #567, #574, #582, #587, #595.</action>
-      <action type="update" dev="ggregory" due-to="Dependabot, Gary Gregory">Bump com.github.luben:zstd-jni from 1.5.6-4 to 1.5.6-8 #565, #578, #601, #616.</action>
+      <action type="update" dev="ggregory" due-to="Dependabot, Gary Gregory">Bump org.apache.commons:commons-parent from 72 to 79 #563, #567, #574, #582, #587, #595.</action>
+      <action type="update" dev="ggregory" due-to="Dependabot, Gary Gregory">Bump com.github.luben:zstd-jni from 1.5.6-4 to 1.5.6-9 #565, #578, #601, #616, #630.</action>
       <action type="update" dev="ggregory" due-to="Dependabot, Gary Gregory">Bump org.apache.commons:commons-lang3 from 3.16.0 to 3.17.0 #568.</action>
       <action type="update" dev="ggregory" due-to="Dependabot, Gary Gregory">Bump commons-io:commons-io from 2.16.1 to 2.18.0 #575, #610.</action>
       <action type="update" dev="ggregory" due-to="Dependabot, Gary Gregory">Bump com.github.marschall:memoryfilesystem from 2.8.0 to 2.8.1 #577.</action>
       <action type="update" dev="ggregory" due-to="Dependabot, Gary Gregory">Bump org.ow2.asm:asm from 9.7 to 9.7.1 #586.</action>
+      <action type="update" dev="ggregory" due-to="Gary Gregory">Bump commons-codec:commons-codec from 1.17.1 to 1.17.2.</action>
       <!-- REMOVE -->
-      <action type="remove" dev="ggregory" issue="COMPRESS-638" due-to="vincexjl, Gary Gregory, Piotr P. Karwasz">GzipCompressorOutputStream no longer percent-endcodes in US-ASCII a file name or comment that the Charset in GzipParameters.setFileNameCharset(Charset) cannot encode.</action>     
+      <action type="remove" dev="ggregory" issue="COMPRESS-638" due-to="vincexjl, Gary Gregory, Piotr P. Karwasz">GzipCompressorOutputStream no longer percent-endcodes in US-ASCII a file name or comment that the Charset in GzipParameters.setFileNameCharset(Charset) cannot encode.</action>
+      <action type="update" dev="ggregory" due-to="Gary Gregory">Remove ZstdCompressorOutputStream.toString(), it was misleading by returning the delegate's toString().</action>
     </release>
     <release version="1.27.1" date="2024-08-16" description="This is a feature and maintenance release. Java 8 or later is required.">
      <action type="fix" issue="COMPRESS-686" dev="ggregory" due-to="Richard Blank, Gary Gregory">Compression into BZip2 format has unexpected end of file when using a BufferedOutputStream.</action>

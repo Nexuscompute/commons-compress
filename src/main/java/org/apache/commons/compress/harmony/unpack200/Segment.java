@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.commons.compress.harmony.unpack200;
 
@@ -145,8 +147,7 @@ public class Segment {
                         firstDollar = index;
                     }
                 }
-                String fileName;
-
+                final String fileName;
                 if (firstDollar > -1 && i <= firstDollar) {
                     fileName = fullName.substring(i, firstDollar) + ".java";
                 } else {
@@ -512,7 +513,7 @@ public class Segment {
     /**
      * Writes the segment to an output stream. The output stream should be pre-buffered for efficiency. Also takes the same input stream for reading, since the
      * file bits may not be loaded and thus just copied from one stream to another. Doesn't close the output stream when finished, in case there are more
-     * entries (e.g. further segments) to be written.
+     * entries (for example further segments) to be written.
      *
      * @param out the JarOutputStream to write data to
      * @throws IOException if an error occurs while reading or writing to the streams

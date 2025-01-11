@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -386,7 +386,7 @@ public class ArArchiveInputStream extends ArchiveInputStream<ArArchiveEntry> {
      * @see #isGNUStringTable
      */
     private ArArchiveEntry readGNUStringTable(final byte[] length, final int offset, final int len) throws IOException {
-        int bufflen;
+        final int bufflen;
         try {
             bufflen = asInt(length, offset, len); // Assume length will fit in an int
         } catch (final NumberFormatException ex) {

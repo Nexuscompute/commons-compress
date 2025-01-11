@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -24,16 +24,20 @@ package org.apache.commons.compress.compressors.snappy;
  * @since 1.12
  */
 public enum FramedSnappyDialect {
+
     /**
      * The standard as defined by the <a href="https://github.com/google/snappy/blob/master/framing_format.txt">Snappy framing format description</a>
      */
     STANDARD(true, true),
+
     /**
      * The format used by Apple's iWork Archives (.iwa files).
      */
     IWORK_ARCHIVE(false, false);
 
-    private final boolean streamIdentifier, checksumWithCompressedChunks;
+    private final boolean streamIdentifier;
+
+    private final boolean checksumWithCompressedChunks;
 
     FramedSnappyDialect(final boolean hasStreamIdentifier, final boolean usesChecksumWithCompressedChunks) {
         this.streamIdentifier = hasStreamIdentifier;

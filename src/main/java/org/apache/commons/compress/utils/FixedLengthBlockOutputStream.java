@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -222,9 +222,7 @@ public class FixedLengthBlockOutputStream extends OutputStream implements Writab
             throw new ClosedChannelException();
         }
         final int srcRemaining = src.remaining();
-
-        if (srcRemaining < buffer.remaining()) {
-        } else {
+        if (srcRemaining >= buffer.remaining()) {
             int srcLeft = srcRemaining;
             final int savedLimit = src.limit();
             // If we're not at the start of buffer, we have some bytes already buffered
